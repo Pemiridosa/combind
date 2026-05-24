@@ -47,7 +47,13 @@ public final class CombindConfig {
 
     public static CombindConfigData config = new CombindConfigData();
 
+    private static boolean ready = false;
+
     public static void save() {
+        // Guard against Options.save() firing during startup before load() has run,
+        // which would overwrite the config file with an empty JSON object.
+        if (!ready) return;
+
         JsonObject keyBinds = new JsonObject();
 
         for (CombindKeyBinding b : CombindRegistry.INSTANCE.getAll()) {
@@ -105,5 +111,7 @@ public final class CombindConfig {
         } catch (Exception e) {
             LOGGER.error("Failed to load " + CombindClient.MOD_ID + " config", e);
         }
+
+        ready = true;
     }
 }
