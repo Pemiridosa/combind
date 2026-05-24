@@ -142,7 +142,9 @@ public final class ComboRecorder {
     public boolean onMouseButton(int button, int action) {
         if (!recording) return false;
         if (action != GLFW.GLFW_PRESS) return true; // swallow release too
-        result    = new KeyCombo(InputKey.mouse(button));
+        // Any keyboard keys currently held become modifiers (e.g. Shift + Mouse Left)
+        InputKey[] mods = held.toArray(InputKey[]::new);
+        result    = new KeyCombo(InputKey.mouse(button), mods, 1);
         finished  = true;
         recording = false;
         return true;
