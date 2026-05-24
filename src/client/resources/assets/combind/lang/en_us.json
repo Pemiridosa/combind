@@ -1,0 +1,15 @@
+{
+  "modmenu.descriptionTranslation.combind": "Expand vanilla keybinds with combo support.",
+
+  "combind.config.title": "Combind Config",
+  "combind.config.category.general": "General",
+
+  "combind.config.allowConflicts": "Allow Conflicts",
+  "combind.config.allowConflicts.tooltip": "When enabled, all actions sharing a combo trigger together. Disable to have only the first registered action execute.",
+
+  "combind.config.sequenceWindowMs": "Sequence Window (ms)",
+  "combind.config.sequenceWindowMs.tooltip": "How long after a key press the next press can still count as part of a sequence.",
+
+  "combind.config.sequenceRecordingWindowMs": "Sequence Recording Window (ms)",
+  "combind.config.sequenceRecordingWindowMs.tooltip": "How long to wait for the next press before finalizing a sequence in the Key Binds screen."
+}

@@ -3,6 +3,7 @@ package net.pemiridosa.combind.impl;
 import com.google.gson.*;
 import net.pemiridosa.combind.CombindClient;
 import net.pemiridosa.combind.config.CombindConfigData;
+import net.pemiridosa.combind.config.ConfigEntry;
 import net.pemiridosa.combind.api.CombindKeyBinding;
 import net.pemiridosa.combind.api.KeyCombo;
 import net.fabricmc.loader.api.FabricLoader;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.Map;
 
 /**
  * Reads and writes Combind settings from/to
@@ -45,27 +47,27 @@ public final class CombindConfig {
 
     private CombindConfig() {}
 
-    public static CombindConfigData config = new CombindConfigData();
+    public static final CombindConfigData config = new CombindConfigData();
 
     private static boolean ready = false;
+
+    // ── Save ──────────────────────────────────────────────────────────────────
 
     public static void save() {
         // Guard against Options.save() firing during startup before load() has run,
         // which would overwrite the config file with an empty JSON object.
         if (!ready) return;
 
-        JsonObject keyBinds = new JsonObject();
+        JsonObject cfg = new JsonObject();
+        for (Map.Entry<String, ConfigEntry<?>> e : config.entries().entrySet())
+            cfg.add(e.getKey(), e.getValue().toJson());
 
-        for (CombindKeyBinding b : CombindRegistry.INSTANCE.getAll()) {
-            keyBinds.add(
-                b.getVanillaMapping().getName(),
-                b.getCombo().toJson()
-            );
-        }
+        JsonObject keyBinds = new JsonObject();
+        for (CombindKeyBinding b : CombindRegistry.INSTANCE.getAll())
+            keyBinds.add(b.getVanillaMapping().getName(), b.getCombo().toJson());
 
         JsonObject root = new JsonObject();
-
-        root.add("config", GSON.toJsonTree(config));
+        root.add("config", cfg);
         root.add("keyBinds", keyBinds);
 
         try {
@@ -75,17 +77,27 @@ public final class CombindConfig {
         }
     }
 
+    // ── Load ──────────────────────────────────────────────────────────────────
+
     public static void load() {
-        if (!Files.exists(PATH))
+        if (!Files.exists(PATH)) {
+            ready = true;
             return;
+        }
 
         try {
             JsonObject root = JsonParser
                 .parseString(Files.readString(PATH))
                 .getAsJsonObject();
 
-            if (root.has("config"))
-                config = GSON.fromJson(root.get("config"), CombindConfigData.class);
+            if (root.has("config") && root.get("config").isJsonObject()) {
+                JsonObject cfg = root.getAsJsonObject("config");
+
+                for (Map.Entry<String, ConfigEntry<?>> e : config.entries().entrySet()) {
+                    if (cfg.has(e.getKey()))
+                        e.getValue().fromJson(cfg.get(e.getKey()));
+                }
+            }
 
             JsonObject keyBinds = root.has("keyBinds") && root.get("keyBinds").isJsonObject()
                 ? root.getAsJsonObject("keyBinds")

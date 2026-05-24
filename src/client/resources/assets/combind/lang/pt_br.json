@@ -1,0 +1,15 @@
+{
+  "modmenu.descriptionTranslation.combind": "Enriquece os atalhos de teclado com suporte a combos.",
+
+  "combind.config.title": "Configuração do Combind",
+  "combind.config.category.general": "Geral",
+
+  "combind.config.allowConflicts": "Permitir Conflitos",
+  "combind.config.allowConflicts.tooltip": "Quando ativo, todas as ações com o mesmo combo são acionadas juntas. Desative para que apenas a primeira registrada seja executada.",
+
+  "combind.config.sequenceWindowMs": "Janela de Sequência (ms)",
+  "combind.config.sequenceWindowMs.tooltip": "Tempo disponível após uma tecla para que a seguinte ainda faça parte da sequência.",
+
+  "combind.config.sequenceRecordingWindowMs": "Janela de Gravação de Sequência (ms)",
+  "combind.config.sequenceRecordingWindowMs.tooltip": "Quanto tempo aguardar pela próxima tecla antes de finalizar uma sequência na tela de Atalhos."
+}

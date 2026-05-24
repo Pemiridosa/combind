@@ -100,7 +100,7 @@ public final class ComboRecorder {
         if (finished)
             return true;
 
-        if (pendingFinalize && System.currentTimeMillis() - pendingTime > CombindConfig.config.sequenceRecordingWindowMs)
+        if (pendingFinalize && System.currentTimeMillis() - pendingTime > CombindConfig.config.sequenceRecordingWindowMs.get())
             buildAndFinalize();
 
         return finished;
@@ -144,7 +144,7 @@ public final class ComboRecorder {
 
             if (pendingFinalize) {
                 // We released a key and are waiting: is this the same key in time?
-                if (iKey.equals(lastSequenceKey) && (now - pendingTime) <= CombindConfig.config.sequenceRecordingWindowMs) {
+                if (iKey.equals(lastSequenceKey) && (now - pendingTime) <= CombindConfig.config.sequenceRecordingWindowMs.get()) {
                     // Continue the sequence
                     pendingFinalize = false;
                     sequenceCount++;
@@ -160,7 +160,7 @@ public final class ComboRecorder {
             }
 
             // Normal first-press tracking
-            if (iKey.equals(lastSequenceKey) && held.isEmpty() && (now - lastSequenceTime) <= CombindConfig.config.sequenceRecordingWindowMs) {
+            if (iKey.equals(lastSequenceKey) && held.isEmpty() && (now - lastSequenceTime) <= CombindConfig.config.sequenceRecordingWindowMs.get()) {
                 sequenceCount++;
             } else {
                 lastSequenceKey = iKey;
