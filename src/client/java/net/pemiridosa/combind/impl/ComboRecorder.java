@@ -8,7 +8,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.*;
 
 /**
- * Captures user input during the rebinding phase in the Controls screen.
+ * Captures user input during the rebinding phase in the {@code Controls... > Key Binds...} screen.
  *
  * <h2>Recording protocol</h2>
  * <ol>
@@ -25,73 +25,85 @@ import java.util.*;
  *       earlier keys are modifiers.</li>
  *   <li><b>Sequence</b>: same key pressed N times within
  *       {@link #SEQUENCE_RECORDING_WINDOW_MS} ms without holding anything else.</li>
- *   <li><b>Mouse button</b>: single click immediately finalises the combo.</li>
+ *   <li><b>Mouse button</b>: single click immediately finalizes the combo.</li>
  * </ul>
  */
 public final class ComboRecorder {
-
     public static final ComboRecorder INSTANCE = new ComboRecorder();
 
     private static final long SEQUENCE_RECORDING_WINDOW_MS = 600L;
 
-    // ── State ─────────────────────────────────────────────────────────────────
+    private boolean recording = false;
+    private boolean finished = false;
 
-    private boolean          recording    = false;
-    private boolean          finished     = false;
     private CombindKeyBinding targetBinding = null;
 
-    private final LinkedHashSet<InputKey> held      = new LinkedHashSet<>();
-    private final List<InputKey>          pressOrder = new ArrayList<>();
+    private final LinkedHashSet<InputKey> held = new LinkedHashSet<>();
+    private final List<InputKey> pressOrder = new ArrayList<>();
 
-    private InputKey lastSequenceKey  = null;
-    private int      sequenceCount    = 0;
-    private long     lastSequenceTime = 0;
+    private InputKey lastSequenceKey = null;
+    private int sequenceCount = 0;
+    private long lastSequenceTime = 0;
 
     private KeyCombo result = null;
 
     private ComboRecorder() {}
 
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
-
     public void startRecording(CombindKeyBinding binding) {
         targetBinding = binding;
+
         startRecording();
     }
 
     public void startRecording() {
-        recording  = true;
-        finished   = false;
-        result     = null;
+        recording = true;
+        finished = false;
+        result = null;
+
         held.clear();
         pressOrder.clear();
-        lastSequenceKey  = null;
-        sequenceCount    = 0;
+
+        lastSequenceKey = null;
+        sequenceCount = 0;
         lastSequenceTime = 0;
     }
 
-    public boolean isRecording()                    { return recording; }
-    public CombindKeyBinding getTargetBinding()     { return targetBinding; }
-    public boolean isFinished()                     { return finished; }
+    public boolean isRecording() {
+        return recording;
+    }
+
+    public CombindKeyBinding getTargetBinding() {
+        return targetBinding;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
 
     public KeyCombo finish() {
-        recording     = false;
-        finished      = false;
+        recording = false;
+        finished = false;
         targetBinding = null;
-        KeyCombo r = result != null ? result : KeyCombo.unbound();
+
+        KeyCombo r = result != null
+            ? result
+            : KeyCombo.unbound();
+
         result = null;
+
         return r;
     }
 
-    // ── Input ─────────────────────────────────────────────────────────────────
-
     /** Feed a keyboard event. Returns {@code true} if consumed. */
     public boolean onKey(int key, int action) {
-        if (!recording) return false;
+        if (!recording)
+            return false;
 
         if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
-            result    = KeyCombo.unbound();
-            finished  = true;
+            result = KeyCombo.unbound();
+            finished = true;
             recording = false;
+
             return true;
         }
 
@@ -100,19 +112,19 @@ public final class ComboRecorder {
         if (action == GLFW.GLFW_PRESS) {
             long now = System.currentTimeMillis();
 
-            if (iKey.equals(lastSequenceKey)
-                    && held.isEmpty()
-                    && (now - lastSequenceTime) <= SEQUENCE_RECORDING_WINDOW_MS) {
+            if (iKey.equals(lastSequenceKey) && held.isEmpty() && (now - lastSequenceTime) <= SEQUENCE_RECORDING_WINDOW_MS) {
                 sequenceCount++;
             } else {
                 lastSequenceKey = iKey;
-                sequenceCount   = 1;
+                sequenceCount = 1;
             }
+
             lastSequenceTime = now;
 
             held.add(iKey);
-            if (!pressOrder.contains(iKey)) pressOrder.add(iKey);
 
+            if (!pressOrder.contains(iKey))
+                pressOrder.add(iKey);
         } else if (action == GLFW.GLFW_RELEASE) {
             held.remove(iKey);
 
@@ -121,10 +133,14 @@ public final class ComboRecorder {
                     result = KeyCombo.sequence(lastSequenceKey, sequenceCount);
                 } else {
                     InputKey trigger = pressOrder.getLast();
-                    InputKey[] mods  = pressOrder.subList(0, pressOrder.size() - 1)
-                                                 .toArray(InputKey[]::new);
+
+                    InputKey[] mods = pressOrder
+                        .subList(0, pressOrder.size() - 1)
+                        .toArray(InputKey[]::new);
+
                     result = new KeyCombo(trigger, mods, 1);
                 }
+
                 finished  = true;
                 recording = false;
             }

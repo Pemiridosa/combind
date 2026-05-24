@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.network.chat.Component;
 
 import java.util.*;
 
@@ -53,8 +54,8 @@ public final class KeyCombo {
     }
 
     public KeyCombo(InputKey triggerKey, InputKey[] modifiers, int sequenceCount) {
-        this.triggerKey    = triggerKey;
-        this.modifiers     = modifiers.clone(); // preserve press order for display
+        this.triggerKey = triggerKey;
+        this.modifiers = modifiers.clone(); // preserve press order for display
         this.sequenceCount = Math.max(1, sequenceCount);
     }
 
@@ -70,31 +71,44 @@ public final class KeyCombo {
 
     // ── Queries ───────────────────────────────────────────────────────────────
 
-    public boolean isUnbound()     { return triggerKey.isUnknown(); }
-    public boolean hasModifiers()  { return modifiers.length > 0; }
-    public boolean isSequence()    { return sequenceCount > 1; }
+    public boolean isUnbound() {
+        return triggerKey.isUnknown();
+    }
+
+    public boolean hasModifiers() {
+        return modifiers.length > 0;
+    }
+
+    public boolean isSequence() {
+        return sequenceCount > 1;
+    }
 
     // ── Display ───────────────────────────────────────────────────────────────
 
     public String getDisplayName() {
-        if (isUnbound()) return "None";
+        if (isUnbound())
+            return Component
+                .translatable("key.keyboard.unknown")
+                .getString();
 
         List<String> parts = new ArrayList<>();
-        for (InputKey mod : modifiers) parts.add(mod.displayName());
+
+        for (InputKey mod : modifiers)
+            parts.add(mod.displayName());
 
         String trigger = triggerKey.displayName();
 
         if (isSequence()) {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < sequenceCount; i++) {
-                if (i > 0) sb.append(' ');
-                sb.append(trigger);
-            }
+
+            sb.repeat(" " + trigger, sequenceCount - 1);
+
             return parts.isEmpty()
-                    ? sb.toString()
-                    : String.join(" + ", parts) + " + " + sb;
+                ? sb.toString()
+                : String.join(" + ", parts) + " + " + sb;
         } else {
             parts.add(trigger);
+
             return String.join(" + ", parts);
         }
     }
@@ -103,17 +117,24 @@ public final class KeyCombo {
 
     public JsonObject toJson() {
         JsonObject obj = new JsonObject();
+
         obj.add("trigger", triggerKey.toJson());
+
         JsonArray mods = new JsonArray();
-        for (InputKey m : modifiers) mods.add(m.toJson());
+
+        for (InputKey m : modifiers)
+            mods.add(m.toJson());
+
         obj.add("modifiers", mods);
         obj.addProperty("sequenceCount", sequenceCount);
+
         return obj;
     }
 
     public static KeyCombo fromJson(JsonObject obj) {
         // Trigger: new format {"type":"keyboard","code":76} OR legacy int field "triggerKey"
         InputKey trigger;
+
         if (obj.has("trigger")) {
             trigger = InputKey.fromJson(obj.getAsJsonObject("trigger"));
         } else {
@@ -122,18 +143,25 @@ public final class KeyCombo {
 
         // Modifiers: new format [{...}] OR legacy [int, ...]
         InputKey[] mods = new InputKey[0];
+
         if (obj.has("modifiers")) {
             JsonArray arr = obj.getAsJsonArray("modifiers");
+
             mods = new InputKey[arr.size()];
+
             for (int i = 0; i < arr.size(); i++) {
                 JsonElement el = arr.get(i);
+
                 mods[i] = el.isJsonObject()
-                        ? InputKey.fromJson(el.getAsJsonObject())
-                        : InputKey.keyboard(el.getAsInt()); // legacy int
+                    ? InputKey.fromJson(el.getAsJsonObject())
+                    : InputKey.keyboard(el.getAsInt()); // legacy int
             }
         }
 
-        int seq = obj.has("sequenceCount") ? obj.get("sequenceCount").getAsInt() : 1;
+        int seq = obj.has("sequenceCount")
+            ? obj.get("sequenceCount").getAsInt()
+            : 1;
+
         return new KeyCombo(trigger, mods, seq);
     }
 
@@ -148,16 +176,23 @@ public final class KeyCombo {
      * overlaps {@code Shift} (Shift is a modifier of one and trigger of the other).
      */
     public boolean overlaps(KeyCombo other) {
-        if (this.isUnbound() || other.isUnbound()) return false;
+        if (this.isUnbound() || other.isUnbound())
+            return false;
+
         // Build a set of all keys used by `other`
         Set<InputKey> otherKeys = new HashSet<>();
+
         otherKeys.add(other.triggerKey);
-        for (InputKey m : other.modifiers) otherKeys.add(m);
+        otherKeys.addAll(Arrays.asList(other.modifiers));
+
         // Check if any key from `this` appears in `other`
-        if (otherKeys.contains(this.triggerKey)) return true;
-        for (InputKey m : this.modifiers) {
-            if (otherKeys.contains(m)) return true;
-        }
+        if (otherKeys.contains(this.triggerKey))
+            return true;
+
+        for (InputKey m : this.modifiers)
+            if (otherKeys.contains(m))
+                return true;
+
         return false;
     }
 
@@ -165,19 +200,25 @@ public final class KeyCombo {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof KeyCombo other)) return false;
+        if (this == o)
+            return true;
+
+        if (!(o instanceof KeyCombo other))
+            return false;
+
         // Compare modifiers order-independently (sort copies, not the stored arrays)
         return triggerKey.equals(other.triggerKey)
-                && Arrays.equals(sorted(modifiers), sorted(other.modifiers))
-                && sequenceCount == other.sequenceCount;
+            && Arrays.equals(sorted(modifiers), sorted(other.modifiers))
+            && sequenceCount == other.sequenceCount;
     }
 
     @Override
     public int hashCode() {
         int h = triggerKey.hashCode();
+
         h = 31 * h + Arrays.hashCode(sorted(modifiers));
         h = 31 * h + sequenceCount;
+
         return h;
     }
 
@@ -190,7 +231,9 @@ public final class KeyCombo {
 
     private static InputKey[] sorted(InputKey[] mods) {
         InputKey[] arr = mods.clone();
+
         Arrays.sort(arr, Comparator.comparingInt(KeyCombo::keyOrdinal));
+
         return arr;
     }
 

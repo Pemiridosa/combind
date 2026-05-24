@@ -14,14 +14,15 @@ import net.minecraft.client.input.MouseButtonEvent;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Intercepts the Controls screen's rebinding flow so Combind bindings are
- * recorded inline — no separate overlay screen.
+ * Intercepts the {@code Controls... > Key Binds...} screen's rebinding flow so
+ * Combind bindings are recorded inline.
  *
  * <h2>Flow</h2>
  * <ol>
@@ -29,8 +30,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *   <li>Our RETURN injection on {@code mouseClicked} (or {@code keyPressed}
  *       for keyboard-nav) detects that {@code selectedKey} is a Combind
  *       binding and starts {@link ComboRecorder} without clearing
- *       {@code selectedKey} — so the Controls screen keeps the button
- *       highlighted in vanilla's "waiting" style.</li>
+ *       {@code selectedKey} — so the {@code Controls... > Key Binds...} screen
+ *       keeps the button highlighted in vanilla's "waiting" style.</li>
  *   <li>{@link KeyboardHandlerMixin} cancels all keyboard events while
  *       recording, feeding them only to {@link ComboRecorder}.</li>
  *   <li>Every render frame our {@code extractRenderState} injection calls
@@ -42,11 +43,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(KeyBindsScreen.class)
 public abstract class KeyBindsScreenMixin {
-
     @Shadow public KeyMapping selectedKey;
     @Shadow private KeyBindsList keyBindsList;
-
-    // ── Intercept button activation ───────────────────────────────────────────
 
     /**
      * When recording is active and the user clicks a mouse button, capture it
@@ -57,10 +55,12 @@ public abstract class KeyBindsScreenMixin {
         at = @At("HEAD"),
         cancellable = true
     )
-    private void combind$beforeMouseClicked(MouseButtonEvent event, boolean doubleClick,
-                                            CallbackInfoReturnable<Boolean> cir) {
-        if (!ComboRecorder.INSTANCE.isRecording()) return;
+    private void combind$beforeMouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
+        if (!ComboRecorder.INSTANCE.isRecording())
+            return;
+
         ComboRecorder.INSTANCE.onMouseButton(event.button(), GLFW.GLFW_PRESS);
+
         cir.setReturnValue(true);
         cir.cancel();
     }
@@ -69,8 +69,7 @@ public abstract class KeyBindsScreenMixin {
         method = "mouseClicked(Lnet/minecraft/client/input/MouseButtonEvent;Z)Z",
         at = @At("RETURN")
     )
-    private void combind$afterMouseClicked(MouseButtonEvent event, boolean doubleClick,
-                                           CallbackInfoReturnable<Boolean> cir) {
+    private void combind$afterMouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
         combind$maybeStartRecording();
     }
 
@@ -82,43 +81,59 @@ public abstract class KeyBindsScreenMixin {
         combind$maybeStartRecording();
     }
 
-    /**
-     * If {@code selectedKey} was just set to a Combind binding and we are not
-     * already recording, start inline recording. We intentionally keep
-     * {@code selectedKey} set so the Controls screen highlights the button.
-     */
-    private void combind$maybeStartRecording() {
-        if (selectedKey == null) return;
-        if (ComboRecorder.INSTANCE.isRecording()) return;
-        if (ComboRecorder.INSTANCE.isFinished()) return; // wait for applyFinishedRecording
-        CombindKeyBinding binding = CombindRegistry.INSTANCE.get(selectedKey);
-        if (binding == null) return;
-        ComboRecorder.INSTANCE.startRecording(binding);
-    }
-
-    // ── Per-frame update: live preview + apply on finish ─────────────────────
-
     @Inject(
         method = "extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V",
         at = @At("HEAD")
     )
-    private void combind$onRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
-                                       float a, CallbackInfo ci) {
+    private void combind$onRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
         if (ComboRecorder.INSTANCE.isFinished()) {
             combind$applyFinishedRecording();
         }
     }
 
+
+    /**
+     * If {@code selectedKey} was just set to a Combind binding and we are not
+     * already recording, start inline recording. We intentionally keep
+     * {@code selectedKey} set so the Controls screen highlights the button.
+     */
+    @Unique
+    private void combind$maybeStartRecording() {
+        if (selectedKey == null)
+            return;
+
+        if (ComboRecorder.INSTANCE.isRecording())
+            return;
+
+        if (ComboRecorder.INSTANCE.isFinished())
+            return; // wait for applyFinishedRecording
+
+        CombindKeyBinding binding = CombindRegistry.INSTANCE.get(selectedKey);
+
+        if (binding == null)
+            return;
+
+        ComboRecorder.INSTANCE.startRecording(binding);
+    }
+
+    @Unique
     private void combind$applyFinishedRecording() {
         KeyCombo newCombo = ComboRecorder.INSTANCE.finish();
-        // selectedKey might have been cleared if the user cancelled some other way
-        if (selectedKey == null) return;
+
+        // selectedKey might have been cleared if the user canceled some other way
+        if (selectedKey == null)
+            return;
+
         CombindKeyBinding binding = CombindRegistry.INSTANCE.get(selectedKey);
+
         if (binding != null) {
             binding.setCombo(newCombo);
+
             CombindConfig.save();
         }
+
         selectedKey = null;
+
         keyBindsList.resetMappingAndUpdateButtons();
     }
 }

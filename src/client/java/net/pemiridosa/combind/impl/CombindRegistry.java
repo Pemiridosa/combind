@@ -11,11 +11,10 @@ import java.util.*;
  * {@link CombindKeyBinding} wrappers.
  */
 public final class CombindRegistry {
-
     public static final CombindRegistry INSTANCE = new CombindRegistry();
 
     private final Map<KeyMapping, CombindKeyBinding> byMapping = new LinkedHashMap<>();
-    private final List<CombindKeyBinding>            all       = new ArrayList<>();
+    private final List<CombindKeyBinding> all = new ArrayList<>();
 
     private CombindRegistry() {}
 
@@ -23,6 +22,7 @@ public final class CombindRegistry {
     public void register(CombindKeyBinding binding) {
         if (!byMapping.containsKey(binding.getVanillaMapping())) {
             byMapping.put(binding.getVanillaMapping(), binding);
+
             all.add(binding);
         }
     }
@@ -43,10 +43,12 @@ public final class CombindRegistry {
      */
     public List<CombindKeyBinding> getByTrigger(InputKey key) {
         List<CombindKeyBinding> result = new ArrayList<>();
+
         for (CombindKeyBinding b : all) {
-            if (b.getCombo().triggerKey.equals(key)) result.add(b);
+            if (b.getCombo().triggerKey.equals(key))
+                result.add(b);
         }
+
         return result;
     }
-
 }

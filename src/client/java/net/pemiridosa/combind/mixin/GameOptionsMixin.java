@@ -9,11 +9,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Hooks into {@link Options#save()} so that Combind combo settings are
- * persisted whenever the player saves game options (e.g. closing the Controls screen).
+ * persisted whenever the player saves game options (e.g. closing the
+ * {@code Controls... > Key Binds...} screen).
  */
 @Mixin(Options.class)
 public abstract class GameOptionsMixin {
-    @Inject(method = "save()V", at = @At("TAIL"))
+    @Inject(
+        method = "save()V",
+        at = @At("TAIL")
+    )
     private void combind$onSave(CallbackInfo ci) {
         CombindConfig.save();
     }

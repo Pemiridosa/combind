@@ -14,16 +14,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * same way keyboard events are fed to {@link ComboInputTracker} via
  * {@link KeyboardHandlerMixin}.
  *
- * We do NOT cancel, so vanilla key-mapping and screen dispatch continue normally.
+ * <p>Do NOT cancel, so vanilla key-mapping and screen dispatch continue normally.
  */
 @Mixin(MouseHandler.class)
 public abstract class MouseHandlerMixin {
-
     @Inject(
         method = "onButton(JLnet/minecraft/client/input/MouseButtonInfo;I)V",
         at = @At("HEAD")
     )
-    private void combind$onButton(long window, MouseButtonInfo buttonInfo, int action, CallbackInfo ci) {
-        ComboInputTracker.INSTANCE.onMouseButton(buttonInfo.button(), action);
+    private void combind$onButton(long handle, MouseButtonInfo rawButtonInfo, int action, CallbackInfo ci) {
+        ComboInputTracker.INSTANCE.onMouseButton(rawButtonInfo.button(), action);
     }
 }

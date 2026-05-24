@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class CombindClient implements ClientModInitializer {
 	public static final String MOD_ID = "combind";
 	public static final Version VERSION;
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	static {
