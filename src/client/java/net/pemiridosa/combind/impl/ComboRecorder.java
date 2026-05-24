@@ -22,16 +22,22 @@ import java.util.*;
  * <h2>Combo detection rules</h2>
  * <ul>
  *   <li><b>Chord</b>: user holds multiple keys; last key released is the trigger,
- *       earlier keys are modifiers.</li>
- *   <li><b>Sequence</b>: same key pressed N times within
- *       {@link #SEQUENCE_RECORDING_WINDOW_MS} ms without holding anything else.</li>
- *   <li><b>Mouse button</b>: single click immediately finalizes the combo.</li>
+ *       earlier keys are modifiers. Finalizes immediately when all keys are released.</li>
+ *   <li><b>Sequence</b>: same single key pressed N times within
+ *       {@link #SEQUENCE_RECORDING_WINDOW_MS} ms. After each release the recorder
+ *       enters a <em>pending</em> state: if the same key arrives again in time the
+ *       count increments; otherwise the result is committed on the next frame after
+ *       the window expires.</li>
+ *   <li><b>Mouse button</b>: immediately finalizes with any currently held keyboard
+ *       keys as modifiers (e.g. Shift + Mouse Left).</li>
  * </ul>
  */
 public final class ComboRecorder {
     public static final ComboRecorder INSTANCE = new ComboRecorder();
 
     private static final long SEQUENCE_RECORDING_WINDOW_MS = 600L;
+
+    // ── State ─────────────────────────────────────────────────────────────────
 
     private boolean recording = false;
     private boolean finished = false;
@@ -45,9 +51,18 @@ public final class ComboRecorder {
     private int sequenceCount = 0;
     private long lastSequenceTime = 0;
 
+    /**
+     * True after a single key is fully released: we're waiting to see if the
+     * same key is pressed again (sequence) before the window expires.
+     */
+    private boolean pendingFinalize = false;
+    private long pendingTime = 0;
+
     private KeyCombo result = null;
 
     private ComboRecorder() {}
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     public void startRecording(CombindKeyBinding binding) {
         targetBinding = binding;
@@ -59,6 +74,8 @@ public final class ComboRecorder {
         recording = true;
         finished = false;
         result = null;
+        pendingFinalize = false;
+        pendingTime = 0;
 
         held.clear();
         pressOrder.clear();
@@ -76,13 +93,25 @@ public final class ComboRecorder {
         return targetBinding;
     }
 
+    /**
+     * Returns true when a result is ready. Also commits a pending single-key
+     * result once the sequence window has expired — called every frame via the
+     * render-state hook so timeouts are detected promptly.
+     */
     public boolean isFinished() {
+        if (finished)
+            return true;
+
+        if (pendingFinalize && System.currentTimeMillis() - pendingTime > SEQUENCE_RECORDING_WINDOW_MS)
+            buildAndFinalize();
+
         return finished;
     }
 
     public KeyCombo finish() {
         recording = false;
         finished = false;
+        pendingFinalize = false;
         targetBinding = null;
 
         KeyCombo r = result != null
@@ -94,6 +123,8 @@ public final class ComboRecorder {
         return r;
     }
 
+    // ── Input ─────────────────────────────────────────────────────────────────
+
     /** Feed a keyboard event. Returns {@code true} if consumed. */
     public boolean onKey(int key, int action) {
         if (!recording)
@@ -101,6 +132,7 @@ public final class ComboRecorder {
 
         if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
             result = KeyCombo.unbound();
+            pendingFinalize = false;
             finished = true;
             recording = false;
 
@@ -112,6 +144,24 @@ public final class ComboRecorder {
         if (action == GLFW.GLFW_PRESS) {
             long now = System.currentTimeMillis();
 
+            if (pendingFinalize) {
+                // We released a key and are waiting: is this the same key in time?
+                if (iKey.equals(lastSequenceKey) && (now - pendingTime) <= SEQUENCE_RECORDING_WINDOW_MS) {
+                    // Continue the sequence
+                    pendingFinalize = false;
+                    sequenceCount++;
+                    lastSequenceTime = now;
+
+                    held.add(iKey);
+                } else {
+                    // Different key or window expired — commit what we have, discard this press
+                    buildAndFinalize();
+                }
+
+                return true;
+            }
+
+            // Normal first-press tracking
             if (iKey.equals(lastSequenceKey) && held.isEmpty() && (now - lastSequenceTime) <= SEQUENCE_RECORDING_WINDOW_MS) {
                 sequenceCount++;
             } else {
@@ -125,24 +175,19 @@ public final class ComboRecorder {
 
             if (!pressOrder.contains(iKey))
                 pressOrder.add(iKey);
+
         } else if (action == GLFW.GLFW_RELEASE) {
             held.remove(iKey);
 
             if (held.isEmpty()) {
-                if (sequenceCount > 1 && pressOrder.size() == 1) {
-                    result = KeyCombo.sequence(lastSequenceKey, sequenceCount);
+                if (pressOrder.size() > 1) {
+                    // Chord: all keys released — finalize immediately
+                    buildAndFinalize();
                 } else {
-                    InputKey trigger = pressOrder.getLast();
-
-                    InputKey[] mods = pressOrder
-                        .subList(0, pressOrder.size() - 1)
-                        .toArray(InputKey[]::new);
-
-                    result = new KeyCombo(trigger, mods, 1);
+                    // Single key: wait to see if it's pressed again (sequence)
+                    pendingFinalize = true;
+                    pendingTime = System.currentTimeMillis();
                 }
-
-                finished  = true;
-                recording = false;
             }
         }
 
@@ -150,46 +195,85 @@ public final class ComboRecorder {
     }
 
     /**
-     * Feed a mouse button event. A press immediately finalises as a single
-     * mouse-button combo (no chord or sequence support for mouse during recording).
-     *
-     * @return {@code true} if consumed.
+     * Feed a mouse button event. Immediately finalizes with any held keyboard
+     * keys as modifiers.
      */
     public boolean onMouseButton(int button, int action) {
-        if (!recording) return false;
-        if (action != GLFW.GLFW_PRESS) return true; // swallow release too
-        // Any keyboard keys currently held become modifiers (e.g. Shift + Mouse Left)
+        if (!recording)
+            return false;
+
+        if (action != GLFW.GLFW_PRESS)
+            return true;
+
         InputKey[] mods = held.toArray(InputKey[]::new);
-        result    = new KeyCombo(InputKey.mouse(button), mods, 1);
-        finished  = true;
+
+        result = new KeyCombo(InputKey.mouse(button), mods, 1);
+        pendingFinalize = false;
+        finished = true;
         recording = false;
+
         return true;
     }
 
-    // ── Preview (kept for possible future display use) ────────────────────────
+    // ── Internal ─────────────────────────────────────────────────────────────
+
+    private void buildAndFinalize() {
+        if (sequenceCount > 1 && pressOrder.size() == 1) {
+            result = KeyCombo.sequence(lastSequenceKey, sequenceCount);
+        } else {
+            InputKey trigger = pressOrder.getLast();
+
+            InputKey[] mods = pressOrder
+                .subList(0, pressOrder.size() - 1)
+                .toArray(InputKey[]::new);
+
+            result = new KeyCombo(trigger, mods, 1);
+        }
+
+        pendingFinalize = false;
+        finished = true;
+        recording = false;
+    }
+
+    // ── Preview ───────────────────────────────────────────────────────────────
 
     public String getPreview() {
-        if (!recording) return "";
-        if (sequenceCount > 0 && held.isEmpty()) return buildSequencePreview();
-        if (!held.isEmpty()) return buildChordPreview();
+        if (!recording)
+            return "";
+
+        if (sequenceCount > 0 && held.isEmpty())
+            return buildSequencePreview();
+
+        if (!held.isEmpty())
+            return buildChordPreview();
+
         return "…";
     }
 
     private String buildChordPreview() {
         List<String> parts = new ArrayList<>();
-        for (InputKey k : pressOrder) {
-            if (held.contains(k)) parts.add(k.displayName());
-        }
+
+        for (InputKey k : pressOrder)
+            if (held.contains(k))
+                parts.add(k.displayName());
+
         return String.join(" + ", parts);
     }
 
     private String buildSequencePreview() {
-        String name = lastSequenceKey != null ? lastSequenceKey.displayName() : "?";
+        String name = lastSequenceKey != null
+            ? lastSequenceKey.displayName()
+            : "?";
+
         StringBuilder sb = new StringBuilder();
+
         for (int i = 0; i < sequenceCount; i++) {
-            if (i > 0) sb.append(' ');
+            if (i > 0)
+                sb.append(' ');
+
             sb.append(name);
         }
+
         return sb.toString();
     }
 }

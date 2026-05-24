@@ -88,13 +88,16 @@ public record KeyCombo(InputKey triggerKey, InputKey[] modifiers, int sequenceCo
         String trigger = triggerKey.displayName();
 
         if (isSequence()) {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(trigger);
 
-            sb.repeat(" " + trigger, sequenceCount - 1);
+            for (int i = 1; i < sequenceCount; i++)
+                sb.append(' ').append(trigger);
+
+            String seq = sb.toString();
 
             return parts.isEmpty()
-                ? sb.toString()
-                : String.join(" + ", parts) + " + " + sb;
+                ? seq
+                : String.join(" + ", parts) + " + " + seq;
         } else {
             parts.add(trigger);
 

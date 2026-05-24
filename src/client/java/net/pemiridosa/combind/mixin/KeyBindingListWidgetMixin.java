@@ -1,7 +1,6 @@
 package net.pemiridosa.combind.mixin;
 
 import net.pemiridosa.combind.api.CombindKeyBinding;
-import net.pemiridosa.combind.api.KeyCombo;
 import net.pemiridosa.combind.impl.CombindRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
@@ -35,13 +34,6 @@ public abstract class KeyBindingListWidgetMixin {
         if (binding == null)
             return key.getTranslatedKeyMessage();
 
-        StringBuilder sb = new StringBuilder(binding.getComboDisplayName());
-
-        KeyCombo combo = binding.getCombo();
-
-        if (combo.isSequence())
-            sb.repeat(" " + binding.getComboDisplayName(), combo.sequenceCount() - 1);
-
-        return Component.literal(sb.toString());
+        return Component.literal(binding.getComboDisplayName());
     }
 }
