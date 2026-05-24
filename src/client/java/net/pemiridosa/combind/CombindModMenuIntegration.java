@@ -7,6 +7,6 @@ import net.pemiridosa.combind.config.CombindConfigScreen;
 public class CombindModMenuIntegration implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return CombindConfigScreen::create;
+        return CombindConfigScreen::new;
     }
 }

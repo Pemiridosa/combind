@@ -1,15 +1,15 @@
 {
   "modmenu.descriptionTranslation.combind": "Plunder th' vanilla key binds with combo support, arrr!",
 
-  "combind.config.title": "Combind Config o' th' Crew",
+  "combind.config.title": "Combind Scrib o' th' Crew",
   "combind.config.category.general": "Generrrral",
 
   "combind.config.allowConflicts": "Allow Skirmishes",
   "combind.config.allowConflicts.tooltip": "When set, all actions with th' same combo trigger as one. Disable to have only th' first registered action see execution.",
 
-  "combind.config.sequenceWindowMs": "Sequence Port'ole (ms)",
-  "combind.config.sequenceWindowMs.tooltip": "How long after a key press th' next can still be counted as part o' th' sequence.",
+  "combind.config.sequenceWindowMs": "Sequence Port'ole",
+  "combind.config.sequenceWindowMs.tooltip": "How long after a key press th' next can still be counted as part o' th' sequence in-game.",
 
-  "combind.config.sequenceRecordingWindowMs": "Sequence Recordin' Port'ole (ms)",
+  "combind.config.sequenceRecordingWindowMs": "Sequence Input Port'ole",
   "combind.config.sequenceRecordingWindowMs.tooltip": "How long to wait fer th' next press before sealing a sequence in th' Knob orders screen."
 }

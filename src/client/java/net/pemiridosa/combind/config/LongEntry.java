@@ -2,8 +2,7 @@ package net.pemiridosa.combind.config;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import me.shedaniel.clothconfig2.api.ConfigCategory;
-import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.network.chat.Component;
 
 public class LongEntry extends ConfigEntry<Long> {
@@ -17,17 +16,17 @@ public class LongEntry extends ConfigEntry<Long> {
     }
 
     @Override
-    public void addTo(ConfigCategory category, ConfigEntryBuilder entries) {
-        category.addEntry(entries
-            .startLongField(Component.translatable(getTranslationKey()), value)
-            .setDefaultValue(getDefault())
-            .setMin(min)
-            .setMax(max)
-            .setTooltip(Component.translatable(getTranslationKey() + ".tooltip"))
-            .setSaveConsumer(this::set)
-            .build());
+    public OptionInstance<Integer> asOption() {
+        return new OptionInstance<>(
+            getTranslationKey(),
+            OptionInstance.cachedConstantTooltip(Component.translatable(getTranslationKey() + ".tooltip")),
+            (caption, val) -> Component.translatable("options.generic_value", caption, val + " ms"),
+            new OptionInstance.IntRange((int) min, (int) max),
+            (int)(long) value,
+            newValue -> set((long)(int) newValue)
+        );
     }
 
-    @Override public JsonElement toJson()           { return new JsonPrimitive(value); }
-    @Override public void fromJson(JsonElement el)  { value = el.getAsLong(); }
+    @Override public JsonElement toJson()          { return new JsonPrimitive(value); }
+    @Override public void fromJson(JsonElement el) { value = el.getAsLong(); }
 }

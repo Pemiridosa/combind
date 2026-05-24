@@ -1,24 +1,23 @@
 package net.pemiridosa.combind.config;
 
-import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import net.pemiridosa.combind.impl.CombindConfig;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 import net.minecraft.network.chat.Component;
 
-public final class CombindConfigScreen {
-    private CombindConfigScreen() {}
+public class CombindConfigScreen extends OptionsSubScreen {
+    public CombindConfigScreen(Screen parent) {
+        super(parent, Minecraft.getInstance().options, Component.translatable("combind.config.title"));
+    }
 
-    public static Screen create(Screen parent) {
-        ConfigBuilder builder = ConfigBuilder.create()
-            .setParentScreen(parent)
-            .setTitle(Component.translatable("combind.config.title"))
-            .setSavingRunnable(CombindConfig::save);
+    @Override
+    protected void addOptions() {
+        this.list.addSmall(CombindConfig.config.asOptions());
+    }
 
-        CombindConfig.config.addEntries(
-            builder.getOrCreateCategory(Component.translatable("combind.config.category.general")),
-            builder.entryBuilder()
-        );
-
-        return builder.build();
+    @Override
+    public void removed() {
+        CombindConfig.save();
     }
 }

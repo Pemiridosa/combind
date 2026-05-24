@@ -2,8 +2,7 @@ package net.pemiridosa.combind.config;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import me.shedaniel.clothconfig2.api.ConfigCategory;
-import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.network.chat.Component;
 
 public class BooleanEntry extends ConfigEntry<Boolean> {
@@ -12,20 +11,15 @@ public class BooleanEntry extends ConfigEntry<Boolean> {
     }
 
     @Override
-    public void addTo(ConfigCategory category, ConfigEntryBuilder entries) {
-        category.addEntry(entries
-            .startBooleanToggle(Component.translatable(getTranslationKey()), value)
-            .setDefaultValue(getDefault())
-            .setTooltip(Component.translatable(getTranslationKey() + ".tooltip"))
-            .setSaveConsumer(this::set)
-            .build());
+    public OptionInstance<Boolean> asOption() {
+        return OptionInstance.createBoolean(
+            getTranslationKey(),
+            OptionInstance.cachedConstantTooltip(Component.translatable(getTranslationKey() + ".tooltip")),
+            value,
+            this::set
+        );
     }
 
-    @Override public JsonElement toJson() {
-        return new JsonPrimitive(value);
-    }
-
-    @Override public void fromJson(JsonElement el) {
-        value = el.getAsBoolean();
-    }
+    @Override public JsonElement toJson()          { return new JsonPrimitive(value); }
+    @Override public void fromJson(JsonElement el) { value = el.getAsBoolean(); }
 }

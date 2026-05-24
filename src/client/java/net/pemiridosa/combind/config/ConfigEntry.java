@@ -1,8 +1,7 @@
 package net.pemiridosa.combind.config;
 
 import com.google.gson.JsonElement;
-import me.shedaniel.clothconfig2.api.ConfigCategory;
-import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import net.minecraft.client.OptionInstance;
 
 public abstract class ConfigEntry<T> {
     private final String translationKey;
@@ -11,29 +10,16 @@ public abstract class ConfigEntry<T> {
 
     protected ConfigEntry(String translationKey, T defaultValue) {
         this.translationKey = translationKey;
-        this.value = defaultValue;
-        this.defaultValue = defaultValue;
+        this.value          = defaultValue;
+        this.defaultValue   = defaultValue;
     }
 
-    public T get() {
-        return value;
-    }
+    public T get()                    { return value; }
+    public void set(T value)          { this.value = value; }
+    public T getDefault()             { return defaultValue; }
+    public String getTranslationKey() { return translationKey; }
 
-    public void set(T value) {
-        this.value = value;
-    }
-
-    public T getDefault() {
-        return defaultValue;
-    }
-
-    public String getTranslationKey() {
-        return translationKey;
-    }
-
-    public abstract void addTo(ConfigCategory category, ConfigEntryBuilder entries);
-
+    public abstract OptionInstance<?> asOption();
     public abstract JsonElement toJson();
-
     public abstract void fromJson(JsonElement element);
 }

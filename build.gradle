@@ -7,7 +7,6 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-	maven { url "https://maven.shedaniel.me/" }
 	maven { url "https://maven.terraformersmc.com/releases/" }
 }
 
@@ -32,14 +31,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	implementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
-		exclude group: "net.fabricmc.fabric-api"
-	}
 	compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
-
-	localRuntime("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
-		exclude group: "net.fabricmc.fabric-api"
-	}
 	localRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 

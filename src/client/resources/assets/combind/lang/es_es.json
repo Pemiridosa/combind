@@ -1,15 +1,15 @@
 {
   "modmenu.descriptionTranslation.combind": "Enriquece los atajos de teclado con soporte para combos.",
 
-  "combind.config.title": "Configuración de Combind",
+  "combind.config.title": "Opcio de Combind",
   "combind.config.category.general": "General",
 
   "combind.config.allowConflicts": "Permitir Conflictos",
   "combind.config.allowConflicts.tooltip": "Cuando está activo, todas las acciones con el mismo combo se activan juntas. Desactiva para que solo la primera registrada se ejecute.",
 
-  "combind.config.sequenceWindowMs": "Ventana de Secuencia (ms)",
-  "combind.config.sequenceWindowMs.tooltip": "Tiempo disponible tras una pulsación para que la siguiente aún forme parte de la secuencia.",
+  "combind.config.sequenceWindowMs": "Ventana de Secuencia",
+  "combind.config.sequenceWindowMs.tooltip": "Tiempo disponible tras una pulsación para que la siguiente aún forme parte de la secuencia, en el juego.",
 
-  "combind.config.sequenceRecordingWindowMs": "Ventana de Grabación de Secuencia (ms)",
-  "combind.config.sequenceRecordingWindowMs.tooltip": "Cuánto tiempo esperar por la siguiente pulsación antes de finalizar una secuencia en la pantalla de Teclas."
+  "combind.config.sequenceRecordingWindowMs": "Ventana de Entrada de Secuencia",
+  "combind.config.sequenceRecordingWindowMs.tooltip": "Cuánto tiempo esperar por la siguiente pulsación antes de finalizar una secuencia, en la pantalla de Teclas."
 }
