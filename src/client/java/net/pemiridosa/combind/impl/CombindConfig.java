@@ -3,7 +3,7 @@ package net.pemiridosa.combind.impl;
 import com.google.gson.*;
 import net.pemiridosa.combind.CombindClient;
 import net.pemiridosa.combind.config.CombindConfigData;
-import net.pemiridosa.combind.config.ConfigEntry;
+import net.pemiridosa.combind.config.entry.ConfigEntry;
 import net.pemiridosa.combind.api.CombindKeyBinding;
 import net.pemiridosa.combind.api.KeyCombo;
 import net.fabricmc.loader.api.FabricLoader;

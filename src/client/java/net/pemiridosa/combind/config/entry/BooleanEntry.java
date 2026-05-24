@@ -1,4 +1,4 @@
-package net.pemiridosa.combind.config;
+package net.pemiridosa.combind.config.entry;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;

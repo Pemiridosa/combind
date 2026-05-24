@@ -1,9 +1,11 @@
 package net.pemiridosa.combind.config;
 
 import net.minecraft.client.OptionInstance;
+import net.pemiridosa.combind.config.entry.BooleanEntry;
+import net.pemiridosa.combind.config.entry.ConfigEntry;
+import net.pemiridosa.combind.config.entry.LongEntry;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

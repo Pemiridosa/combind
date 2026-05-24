@@ -13,7 +13,8 @@ public class CombindConfigScreen extends OptionsSubScreen {
 
     @Override
     protected void addOptions() {
-        this.list.addSmall(CombindConfig.config.asOptions());
+        if (this.list != null)
+            this.list.addSmall(CombindConfig.config.asOptions());
     }
 
     @Override
