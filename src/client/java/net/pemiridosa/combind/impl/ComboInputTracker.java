@@ -86,7 +86,7 @@ public final class ComboInputTracker {
 
         SeqState prev = seqStates.get(key);
 
-        int newCount = (prev != null && (now - prev.lastPressMs()) <= KeyCombo.SEQUENCE_WINDOW_MS)
+        int newCount = (prev != null && (now - prev.lastPressMs()) <= CombindConfig.config.sequenceWindowMs)
             ? prev.count() + 1
             : 1;
 
@@ -95,7 +95,7 @@ public final class ComboInputTracker {
             new SeqState(now, newCount)
         );
 
-        Set<KeyCombo> firedCombos = CombindConfig.allowConflicts
+        Set<KeyCombo> firedCombos = CombindConfig.config.allowConflicts
             ? null
             : new HashSet<>();
 
@@ -158,10 +158,9 @@ public final class ComboInputTracker {
         if (combo.triggerKey().equals(key))
             return true;
 
-        for (InputKey mod : combo.modifiers()) {
+        for (InputKey mod : combo.modifiers())
             if (mod.equals(key) || isOppositeModifier(mod, key))
                 return true;
-        }
 
         return false;
     }

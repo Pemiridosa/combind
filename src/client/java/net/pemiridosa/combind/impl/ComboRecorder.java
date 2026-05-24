@@ -24,7 +24,7 @@ import java.util.*;
  *   <li><b>Chord</b>: user holds multiple keys; last key released is the trigger,
  *       earlier keys are modifiers. Finalizes immediately when all keys are released.</li>
  *   <li><b>Sequence</b>: same single key pressed N times within
- *       {@link #SEQUENCE_RECORDING_WINDOW_MS} ms. After each release the recorder
+ *       {@code CombindConfig.sequenceRecordingWindowMs} ms. After each release the recorder
  *       enters a <em>pending</em> state: if the same key arrives again in time the
  *       count increments; otherwise the result is committed on the next frame after
  *       the window expires.</li>
@@ -34,8 +34,6 @@ import java.util.*;
  */
 public final class ComboRecorder {
     public static final ComboRecorder INSTANCE = new ComboRecorder();
-
-    private static final long SEQUENCE_RECORDING_WINDOW_MS = 600L;
 
     // ── State ─────────────────────────────────────────────────────────────────
 
@@ -102,7 +100,7 @@ public final class ComboRecorder {
         if (finished)
             return true;
 
-        if (pendingFinalize && System.currentTimeMillis() - pendingTime > SEQUENCE_RECORDING_WINDOW_MS)
+        if (pendingFinalize && System.currentTimeMillis() - pendingTime > CombindConfig.config.sequenceRecordingWindowMs)
             buildAndFinalize();
 
         return finished;
@@ -146,7 +144,7 @@ public final class ComboRecorder {
 
             if (pendingFinalize) {
                 // We released a key and are waiting: is this the same key in time?
-                if (iKey.equals(lastSequenceKey) && (now - pendingTime) <= SEQUENCE_RECORDING_WINDOW_MS) {
+                if (iKey.equals(lastSequenceKey) && (now - pendingTime) <= CombindConfig.config.sequenceRecordingWindowMs) {
                     // Continue the sequence
                     pendingFinalize = false;
                     sequenceCount++;
@@ -162,7 +160,7 @@ public final class ComboRecorder {
             }
 
             // Normal first-press tracking
-            if (iKey.equals(lastSequenceKey) && held.isEmpty() && (now - lastSequenceTime) <= SEQUENCE_RECORDING_WINDOW_MS) {
+            if (iKey.equals(lastSequenceKey) && held.isEmpty() && (now - lastSequenceTime) <= CombindConfig.config.sequenceRecordingWindowMs) {
                 sequenceCount++;
             } else {
                 lastSequenceKey = iKey;

@@ -2,6 +2,7 @@ package net.pemiridosa.combind.impl;
 
 import com.google.gson.*;
 import net.pemiridosa.combind.CombindClient;
+import net.pemiridosa.combind.config.CombindConfigData;
 import net.pemiridosa.combind.api.CombindKeyBinding;
 import net.pemiridosa.combind.api.KeyCombo;
 import net.fabricmc.loader.api.FabricLoader;
@@ -15,12 +16,21 @@ import java.nio.file.*;
  * Reads and writes Combind settings from/to
  * {@code .minecraft/config/combind.json}.
  *
- * <h2>Config options</h2>
- * <ul>
- *   <li>{@code allowConflicts} — when {@code true} (default), multiple bindings
- *       assigned the same combo all fire simultaneously. When {@code false},
- *       only the first registered binding fires.</li>
- * </ul>
+ * <h2>JSON structure</h2>
+ * <pre>
+ * {
+ *   "config": {
+ *     "allowConflicts": true,
+ *     "sequenceWindowMs": 400,
+ *     "sequenceRecordingWindowMs": 600,
+ *     ...
+ *   },
+ *   "keyBinds": {
+ *     "key.attack": { ... },
+ *     ...
+ *   }
+ * }
+ * </pre>
  */
 public final class CombindConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(CombindClient.MOD_ID + "/config");
@@ -35,34 +45,29 @@ public final class CombindConfig {
 
     private CombindConfig() {}
 
-    /**
-     * When {@code true} (default), multiple bindings with the same combo all
-     * fire at the same time. Set to {@code false} to let the first registered
-     * binding win and suppress the rest.
-     */
-    public static boolean allowConflicts = true;
-
+    public static CombindConfigData config = new CombindConfigData();
 
     public static void save() {
-        JsonObject root = new JsonObject();
-
-        root.addProperty("allowConflicts", allowConflicts);
+        JsonObject keyBinds = new JsonObject();
 
         for (CombindKeyBinding b : CombindRegistry.INSTANCE.getAll()) {
-            root.add(
+            keyBinds.add(
                 b.getVanillaMapping().getName(),
                 b.getCombo().toJson()
             );
         }
 
+        JsonObject root = new JsonObject();
+
+        root.add("config", GSON.toJsonTree(config));
+        root.add("keyBinds", keyBinds);
+
         try {
             Files.writeString(PATH, GSON.toJson(root));
         } catch (IOException e) {
-            LOGGER.error("Failed to save" + CombindClient.MOD_ID + "config", e);
+            LOGGER.error("Failed to save " + CombindClient.MOD_ID + " config", e);
         }
     }
-
-    // ── Load ──────────────────────────────────────────────────────────────────
 
     public static void load() {
         if (!Files.exists(PATH))
@@ -73,17 +78,20 @@ public final class CombindConfig {
                 .parseString(Files.readString(PATH))
                 .getAsJsonObject();
 
-            if (root.has("allowConflicts")) {
-                allowConflicts = root.get("allowConflicts").getAsBoolean();
-            }
+            if (root.has("config"))
+                config = GSON.fromJson(root.get("config"), CombindConfigData.class);
+
+            JsonObject keyBinds = root.has("keyBinds") && root.get("keyBinds").isJsonObject()
+                ? root.getAsJsonObject("keyBinds")
+                : new JsonObject();
 
             for (CombindKeyBinding b : CombindRegistry.INSTANCE.getAll()) {
                 String name = b.getVanillaMapping().getName();
 
-                if (!root.has(name))
+                if (!keyBinds.has(name))
                     continue;
 
-                JsonElement el = root.get(name);
+                JsonElement el = keyBinds.get(name);
 
                 if (!el.isJsonObject())
                     continue;
@@ -95,7 +103,7 @@ public final class CombindConfig {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to load" + CombindClient.MOD_ID + "config", e);
+            LOGGER.error("Failed to load " + CombindClient.MOD_ID + " config", e);
         }
     }
 }

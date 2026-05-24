@@ -29,11 +29,6 @@ import java.util.*;
  *                      {@code 1} = single press.
  */
 public record KeyCombo(InputKey triggerKey, InputKey[] modifiers, int sequenceCount) {
-    /** Maximum time (ms) between presses in a sequence. */
-    public static final long SEQUENCE_WINDOW_MS = 400L;
-
-    // ── Constructors ─────────────────────────────────────────────────────────
-
     public KeyCombo(InputKey triggerKey) {
         this(triggerKey, new InputKey[0], 1);
     }
