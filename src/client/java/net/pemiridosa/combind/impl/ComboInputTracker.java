@@ -155,10 +155,10 @@ public final class ComboInputTracker {
     }
 
     private boolean shouldDeactivate(KeyCombo combo, InputKey key) {
-        if (combo.triggerKey.equals(key))
+        if (combo.triggerKey().equals(key))
             return true;
 
-        for (InputKey mod : combo.modifiers) {
+        for (InputKey mod : combo.modifiers()) {
             if (mod.equals(key) || isOppositeModifier(mod, key))
                 return true;
         }
@@ -167,13 +167,13 @@ public final class ComboInputTracker {
     }
 
     private boolean matches(KeyCombo combo, InputKey trigger, int sequenceSoFar) {
-        if (!combo.triggerKey.equals(trigger))
+        if (!combo.triggerKey().equals(trigger))
             return false;
 
-        if (combo.isSequence() && sequenceSoFar != combo.sequenceCount)
+        if (combo.isSequence() && sequenceSoFar != combo.sequenceCount())
             return false;
 
-        for (InputKey mod : combo.modifiers) {
+        for (InputKey mod : combo.modifiers()) {
             if (!isModifierHeld(mod))
                 return false;
         }

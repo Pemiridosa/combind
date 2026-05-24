@@ -40,7 +40,7 @@ public abstract class KeyBindingListWidgetMixin {
         KeyCombo combo = binding.getCombo();
 
         if (combo.isSequence())
-            sb.repeat(" " + binding.getComboDisplayName(), combo.sequenceCount - 1);
+            sb.repeat(" " + binding.getComboDisplayName(), combo.sequenceCount() - 1);
 
         return Component.literal(sb.toString());
     }

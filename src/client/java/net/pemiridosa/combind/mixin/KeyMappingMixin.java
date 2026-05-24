@@ -93,14 +93,14 @@ public abstract class KeyMappingMixin {
             return;
         }
 
-        if (!(combo.triggerKey instanceof InputKey.Keyboard(int glfwCode)) || glfwCode != event.key()) {
+        if (!(combo.triggerKey() instanceof InputKey.Keyboard(int glfwCode)) || glfwCode != event.key()) {
             cir.setReturnValue(false);
             return;
         }
 
         Window window = Minecraft.getInstance().getWindow();
 
-        for (InputKey mod : combo.modifiers) {
+        for (InputKey mod : combo.modifiers()) {
             if (!isPhysicallyHeld(window, mod)) {
                 cir.setReturnValue(false);
                 return;
@@ -128,13 +128,13 @@ public abstract class KeyMappingMixin {
             return;
         }
 
-        if (!(combo.triggerKey instanceof InputKey.Mouse(int glfwButton)) || glfwButton != event.button()) {
+        if (!(combo.triggerKey() instanceof InputKey.Mouse(int glfwButton)) || glfwButton != event.button()) {
             cir.setReturnValue(false); return;
         }
 
         Window window = Minecraft.getInstance().getWindow();
 
-        for (InputKey mod : combo.modifiers) {
+        for (InputKey mod : combo.modifiers()) {
             if (!isPhysicallyHeld(window, mod)) {
                 cir.setReturnValue(false);
                 return;

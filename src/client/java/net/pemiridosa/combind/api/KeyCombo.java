@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -20,28 +21,16 @@ import java.util.*;
  *
  * <p>The input type (keyboard vs. mouse) is encoded in {@link InputKey}, so there
  * is no need for magic offset constants.
+ *
+ * @param triggerKey    The primary input that triggers this combo.
+ * @param modifiers     Modifier / chord keys that must be held when {@link #triggerKey()} fires.
+ *                      Stored in a canonical order for deterministic equality.
+ * @param sequenceCount How many times {@link #triggerKey()} must be pressed in quick succession.
+ *                      {@code 1} = single press.
  */
-public final class KeyCombo {
-
+public record KeyCombo(InputKey triggerKey, InputKey[] modifiers, int sequenceCount) {
     /** Maximum time (ms) between presses in a sequence. */
     public static final long SEQUENCE_WINDOW_MS = 400L;
-
-    // ── Fields ───────────────────────────────────────────────────────────────
-
-    /** The primary input that triggers this combo. */
-    public final InputKey triggerKey;
-
-    /**
-     * Modifier / chord keys that must be held when {@link #triggerKey} fires.
-     * Stored in a canonical order for deterministic equality.
-     */
-    public final InputKey[] modifiers;
-
-    /**
-     * How many times {@link #triggerKey} must be pressed in quick succession.
-     * {@code 1} = single press.
-     */
-    public final int sequenceCount;
 
     // ── Constructors ─────────────────────────────────────────────────────────
 
@@ -223,7 +212,7 @@ public final class KeyCombo {
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return "KeyCombo{" + getDisplayName() + "}";
     }
 

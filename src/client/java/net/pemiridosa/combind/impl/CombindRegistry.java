@@ -45,7 +45,7 @@ public final class CombindRegistry {
         List<CombindKeyBinding> result = new ArrayList<>();
 
         for (CombindKeyBinding b : all) {
-            if (b.getCombo().triggerKey.equals(key))
+            if (b.getCombo().triggerKey().equals(key))
                 result.add(b);
         }
 
