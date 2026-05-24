@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "combind",
+	"version": "${version}",
+	"name": "Combind",
+	"description": "Expand vanilla keybinds with combo support",
+	"authors": [
+		"Pemiridosa"
+	],
+	"contact": {
+		"sources": "https://github.com/5antos/combind"
+	},
+	"license": "MIT",
+	"icon": "assets/combind/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"net.pemiridosa.combind.CombindClient"
+		]
+	},
+	"mixins": [
+		{
+			"config": "combind.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.2",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	},
+	"custom": {
+		"modmenu:badges": ["client-side"]
+	}
+}
