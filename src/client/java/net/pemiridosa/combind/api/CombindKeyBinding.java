@@ -18,6 +18,7 @@ import java.util.function.Consumer;
  * CombindKeyBinding binding = CombindKeyBinding.of(
  *     new KeyMapping("key.mymod.myaction", GLFW.GLFW_KEY_A, "key.categories.mymod")
  * );
+ *
  * binding.onPress(ctx -> System.out.println("pressed!"));
  * binding.onRelease(ctx -> System.out.println("released!"));
  * }</pre>
@@ -26,9 +27,6 @@ import java.util.function.Consumer;
  * Combind will automatically track the assigned {@link KeyCombo} for it.
  */
 public final class CombindKeyBinding {
-
-    // ── Fields ────────────────────────────────────────────────────────────────
-
     private final KeyMapping vanillaMapping;
 
     /** Current combo. May be changed by the player in the Controls screen. */
@@ -39,10 +37,8 @@ public final class CombindKeyBinding {
     private volatile int pendingClicks = 0;
 
     // Callbacks
-    private final List<Consumer<PressContext>> pressCallbacks    = new ArrayList<>();
-    private final List<Consumer<PressContext>> releaseCallbacks  = new ArrayList<>();
-
-    // ── Construction ──────────────────────────────────────────────────────────
+    private final List<Consumer<PressContext>> pressCallbacks = new ArrayList<>();
+    private final List<Consumer<PressContext>> releaseCallbacks = new ArrayList<>();
 
     private CombindKeyBinding(KeyMapping vanillaMapping, KeyCombo initialCombo) {
         this.vanillaMapping = vanillaMapping;
@@ -58,15 +54,17 @@ public final class CombindKeyBinding {
      */
     public static CombindKeyBinding of(KeyMapping vanillaMapping) {
         InputConstants.Key def = vanillaMapping.getDefaultKey();
+
         InputKey initialKey;
-        if (def.getType() == InputConstants.Type.KEYSYM
-                && def.getValue() != InputConstants.UNKNOWN.getValue()) {
+
+        if (def.getType() == InputConstants.Type.KEYSYM && def.getValue() != InputConstants.UNKNOWN.getValue()) {
             initialKey = InputKey.keyboard(def.getValue());
         } else if (def.getType() == InputConstants.Type.MOUSE) {
             initialKey = InputKey.mouse(def.getValue());
         } else {
             initialKey = InputKey.unknown();
         }
+
         return of(vanillaMapping, new KeyCombo(initialKey));
     }
 
@@ -75,7 +73,9 @@ public final class CombindKeyBinding {
      */
     public static CombindKeyBinding of(KeyMapping vanillaMapping, KeyCombo initialCombo) {
         CombindKeyBinding binding = new CombindKeyBinding(vanillaMapping, initialCombo);
+
         CombindRegistry.INSTANCE.register(binding);
+
         return binding;
     }
 
@@ -94,6 +94,7 @@ public final class CombindKeyBinding {
     /** Called by Combind internals when the player changes the combo. */
     public void setCombo(KeyCombo combo) {
         this.combo = combo;
+
         // Reset activation state whenever the combo changes
         active = false;
         pendingClicks = 0;
@@ -101,13 +102,25 @@ public final class CombindKeyBinding {
 
     // ── In-game state (used by KeyMappingMixin) ───────────────────────────────
 
-    public void setActive(boolean active) { this.active = active; }
-    public boolean isActive() { return active; }
-    public void addClick() { pendingClicks++; }
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void addClick() {
+        pendingClicks++;
+    }
+
     /** Consume one pending click, returning true if there was one. */
     public boolean consumeClick() {
-        if (pendingClicks <= 0) return false;
+        if (pendingClicks <= 0)
+            return false;
+
         pendingClicks--;
+
         return true;
     }
 
@@ -119,6 +132,7 @@ public final class CombindKeyBinding {
      */
     public CombindKeyBinding onPress(Consumer<PressContext> callback) {
         pressCallbacks.add(callback);
+
         return this;
     }
 
@@ -131,6 +145,7 @@ public final class CombindKeyBinding {
      */
     public CombindKeyBinding onRelease(Consumer<PressContext> callback) {
         releaseCallbacks.add(callback);
+
         return this;
     }
 
@@ -167,7 +182,12 @@ public final class CombindKeyBinding {
         CombindKeyBinding binding,
         boolean isRelease // True if this is a release event, false for press.
     ) {
-        public KeyMapping vanillaMapping() { return binding.getVanillaMapping(); }
-        public KeyCombo combo() { return binding.getCombo(); }
+        public KeyMapping vanillaMapping() {
+            return binding.getVanillaMapping();
+        }
+
+        public KeyCombo combo() {
+            return binding.getCombo();
+        }
     }
 }

@@ -19,55 +19,86 @@ import java.util.Locale;
  * }</pre>
  */
 public sealed interface InputKey permits InputKey.Keyboard, InputKey.Mouse {
-
-    // ── Implementations ───────────────────────────────────────────────────────
-
     /** A keyboard key, identified by its GLFW key code. */
     record Keyboard(int glfwCode) implements InputKey {
-        @Override public boolean isUnknown()    { return glfwCode == GLFW.GLFW_KEY_UNKNOWN; }
-        @Override public String  displayName()  { return keyboardName(glfwCode); }
+        @Override
+        public boolean isUnknown() {
+            return glfwCode == GLFW.GLFW_KEY_UNKNOWN;
+        }
+
+        @Override
+        public String displayName() {
+            return keyboardName(glfwCode);
+        }
     }
 
     /** A mouse button, identified by its GLFW button code (0 = left, 1 = right, 2 = middle, …). */
     record Mouse(int glfwButton) implements InputKey {
-        @Override public boolean isUnknown()   { return false; }
-        @Override public String  displayName() { return mouseName(glfwButton); }
+        @Override
+        public boolean isUnknown() {
+            return false;
+        }
+
+        @Override
+        public String displayName() {
+            return mouseName(glfwButton);
+        }
     }
 
     // ── Contracts ─────────────────────────────────────────────────────────────
 
     boolean isUnknown();
-    String  displayName();
+    String displayName();
 
     // ── Factories ─────────────────────────────────────────────────────────────
 
-    static InputKey keyboard(int glfwCode)  { return new Keyboard(glfwCode); }
-    static InputKey mouse(int glfwButton)   { return new Mouse(glfwButton); }
-    static InputKey unknown()               { return new Keyboard(GLFW.GLFW_KEY_UNKNOWN); }
+    static InputKey keyboard(int glfwCode) {
+        return new Keyboard(glfwCode);
+    }
+
+    static InputKey mouse(int glfwButton) {
+        return new Mouse(glfwButton);
+    }
+
+    static InputKey unknown() {
+        return new Keyboard(GLFW.GLFW_KEY_UNKNOWN);
+    }
 
     // ── Serialization ─────────────────────────────────────────────────────────
 
     default JsonObject toJson() {
         JsonObject o = new JsonObject();
+
         switch (this) {
-            case Keyboard k -> { o.addProperty("type", "keyboard"); o.addProperty("code", k.glfwCode()); }
-            case Mouse    m -> { o.addProperty("type", "mouse");    o.addProperty("code", m.glfwButton()); }
+            case Keyboard k -> {
+                o.addProperty("type", "keyboard");
+                o.addProperty("code", k.glfwCode());
+            }
+            case Mouse m -> {
+                o.addProperty("type", "mouse");
+                o.addProperty("code", m.glfwButton());
+            }
         }
+
         return o;
     }
 
     static InputKey fromJson(JsonObject o) {
-        int  code = o.get("code").getAsInt();
-        return "mouse".equals(o.get("type").getAsString()) ? mouse(code) : keyboard(code);
+        int code = o.get("code").getAsInt();
+
+        return "mouse".equals(o.get("type").getAsString())
+            ? mouse(code)
+            : keyboard(code);
     }
 
     // ── Display helpers ───────────────────────────────────────────────────────
 
     static String keyboardName(int key) {
         String name = GLFW.glfwGetKeyName(key, -1);
-        if (name != null && !name.isEmpty()) {
+
+        if (name != null && !name.isEmpty())
             return name.substring(0, 1).toUpperCase(Locale.ROOT) + name.substring(1);
-        }
+
         return switch (key) {
             case GLFW.GLFW_KEY_LEFT_SHIFT, GLFW.GLFW_KEY_RIGHT_SHIFT     -> "Shift";
             case GLFW.GLFW_KEY_LEFT_CONTROL, GLFW.GLFW_KEY_RIGHT_CONTROL -> "Ctrl";
@@ -116,7 +147,7 @@ public sealed interface InputKey permits InputKey.Keyboard, InputKey.Mouse {
             case GLFW.GLFW_KEY_KP_MULTIPLY  -> "Num *";
             case GLFW.GLFW_KEY_KP_DIVIDE    -> "Num /";
             case GLFW.GLFW_KEY_UNKNOWN      -> "None";
-            default                          -> "Key " + key;
+            default                         -> "Key " + key;
         };
     }
 
@@ -125,7 +156,7 @@ public sealed interface InputKey permits InputKey.Keyboard, InputKey.Mouse {
             case GLFW.GLFW_MOUSE_BUTTON_LEFT   -> "Mouse Left";
             case GLFW.GLFW_MOUSE_BUTTON_RIGHT  -> "Mouse Right";
             case GLFW.GLFW_MOUSE_BUTTON_MIDDLE -> "Mouse Middle";
-            default                             -> "Mouse " + (button + 1);
+            default                            -> "Mouse " + (button + 1);
         };
     }
 }
