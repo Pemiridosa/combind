@@ -9,6 +9,7 @@ import net.pemiridosa.combind.impl.CombindConfig;
 import net.pemiridosa.combind.impl.CombindRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import org.lwjgl.glfw.GLFW;
@@ -36,6 +37,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(KeyMapping.class)
 public abstract class KeyMappingMixin {
     @Shadow public abstract InputConstants.Key getDefaultKey();
+
+    @Inject(
+        method = "getTranslatedKeyMessage()Lnet/minecraft/network/chat/Component;",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    private void combind$getTranslatedKeyMessage(CallbackInfoReturnable<Component> cir) {
+        CombindKeyBinding binding = CombindRegistry.INSTANCE.get((KeyMapping)(Object) this);
+
+        if (binding == null)
+            return;
+
+        cir.setReturnValue(Component.literal(binding.getComboDisplayName()));
+    }
 
     @Inject(
         method = "isDown()Z",

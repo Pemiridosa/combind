@@ -33,7 +33,7 @@
 		"java": ">=25",
 		"fabric-api": "*"
 	},
-	"recommends": {
+	"suggests": {
 		"modmenu": "*"
 	},
 	"custom": {
