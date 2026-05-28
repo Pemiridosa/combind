@@ -11,7 +11,6 @@ import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -56,13 +55,15 @@ public abstract class KeyBindsScreenMixin {
         cancellable = true
     )
     private void combind$beforeMouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
-        if (!ComboRecorder.INSTANCE.isRecording())
-            return;
-
-        ComboRecorder.INSTANCE.onMouseButton(event.button(), GLFW.GLFW_PRESS);
-
-        cir.setReturnValue(true);
-        cir.cancel();
+        // Recording is handled in MouseHandlerMixin (fires for all buttons including side
+        // buttons 3+, which never reach mouseClicked). We only need to cancel here so the
+        // screen doesn't react to button presses mid-recording.
+        // Check isFinished() too: for buttons 0-2, MouseHandlerMixin already completed
+        // recording before this mouseClicked dispatch fires.
+        if (ComboRecorder.INSTANCE.isRecording() || ComboRecorder.INSTANCE.isFinished()) {
+            cir.setReturnValue(true);
+            cir.cancel();
+        }
     }
 
     @Inject(
