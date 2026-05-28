@@ -3,7 +3,6 @@
 	"package": "net.pemiridosa.combind.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"KeyBindingListWidgetMixin",
 		"KeyBindsScreenMixin",
 		"KeyboardHandlerMixin",
 		"KeyMappingMixin",
