@@ -22,7 +22,7 @@ public class CombindConfigData {
 
     public final LongEntry sequenceRecordingWindowMs = new LongEntry(
         "combind.config.sequenceRecordingWindowMs",
-        600L, 50L, 1000L
+        200L, 50L, 1000L
     );
 
     /** Returns all entries keyed by their JSON field name, in declaration order. */
