@@ -159,7 +159,7 @@ public final class ComboInputTracker {
             return true;
 
         for (InputKey mod : combo.modifiers())
-            if (mod.equals(key) || isOppositeModifier(mod, key))
+            if (mod.equals(key))
                 return true;
 
         return false;
@@ -173,46 +173,10 @@ public final class ComboInputTracker {
             return false;
 
         for (InputKey mod : combo.modifiers()) {
-            if (!isModifierHeld(mod))
+            if (!heldKeys.contains(mod))
                 return false;
         }
 
         return true;
-    }
-
-    private boolean isModifierHeld(InputKey mod) {
-        if (heldKeys.contains(mod))
-            return true;
-
-        InputKey opp = oppositeModifier(mod);
-
-        return opp != null && heldKeys.contains(opp);
-    }
-
-    private boolean isOppositeModifier(InputKey mod, InputKey released) {
-        InputKey opp = oppositeModifier(mod);
-
-        return opp != null && opp.equals(released);
-    }
-
-    private static InputKey oppositeModifier(InputKey mod) {
-        if (!(mod instanceof InputKey.Keyboard(int glfwCode)))
-            return null;
-
-        int opp = switch (glfwCode) {
-            case GLFW.GLFW_KEY_LEFT_SHIFT    -> GLFW.GLFW_KEY_RIGHT_SHIFT;
-            case GLFW.GLFW_KEY_RIGHT_SHIFT   -> GLFW.GLFW_KEY_LEFT_SHIFT;
-            case GLFW.GLFW_KEY_LEFT_CONTROL  -> GLFW.GLFW_KEY_RIGHT_CONTROL;
-            case GLFW.GLFW_KEY_RIGHT_CONTROL -> GLFW.GLFW_KEY_LEFT_CONTROL;
-            case GLFW.GLFW_KEY_LEFT_ALT      -> GLFW.GLFW_KEY_RIGHT_ALT;
-            case GLFW.GLFW_KEY_RIGHT_ALT     -> GLFW.GLFW_KEY_LEFT_ALT;
-            case GLFW.GLFW_KEY_LEFT_SUPER    -> GLFW.GLFW_KEY_RIGHT_SUPER;
-            case GLFW.GLFW_KEY_RIGHT_SUPER   -> GLFW.GLFW_KEY_LEFT_SUPER;
-            default                          -> -1;
-        };
-
-        return opp == -1
-            ? null
-            : InputKey.keyboard(opp);
     }
 }
