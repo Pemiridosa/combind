@@ -5,7 +5,7 @@
   "combind.config.category.general": "Geral",
 
   "combind.config.allowConflicts": "Permitir Conflitos",
-  "combind.config.allowConflicts.tooltip": "Quando ativo, todas as ações com o mesmo combo são acionadas juntas. Desative para que apenas a primeira registrada seja executada.",
+  "combind.config.allowConflicts.tooltip": "Quando desativado, pressionar um combo não acionará atalhos cujas teclas estejam totalmente contidas nele. Por exemplo, pressionar Shift+E não acionará também E.",
 
   "combind.config.sequenceWindowMs": "Janela de Sequência",
   "combind.config.sequenceWindowMs.tooltip": "Tempo disponível após uma tecla para que a seguinte ainda faça parte da sequência, no jogo.",

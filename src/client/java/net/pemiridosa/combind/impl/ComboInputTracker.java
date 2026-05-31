@@ -83,53 +83,76 @@ public final class ComboInputTracker {
             return;
 
         long now = System.currentTimeMillis();
+        int sequenceCount = advanceSequence(key, now);
+        List<CombindKeyBinding> matched = collectMatches(key, sequenceCount);
+        List<CombindKeyBinding> toFire = resolveConflicts(matched);
 
+        for (CombindKeyBinding binding : toFire)
+            activate(binding, key, now);
+    }
+
+    private int advanceSequence(InputKey key, long now) {
         SeqState prev = seqStates.get(key);
 
-        int newCount = (prev != null && (now - prev.lastPressMs()) <= CombindConfig.config.sequenceWindowMs.get())
+        int count = (prev != null && (now - prev.lastPressMs()) <= CombindConfig.config.sequenceWindowMs.get())
             ? prev.count() + 1
             : 1;
 
-        seqStates.put(
-            key,
-            new SeqState(now, newCount)
-        );
+        seqStates.put(key, new SeqState(now, count));
 
-        Set<KeyCombo> firedCombos = CombindConfig.config.allowConflicts.get()
-            ? null
-            : new HashSet<>();
+        return count;
+    }
 
-        for (CombindKeyBinding binding : CombindRegistry.INSTANCE.getByTrigger(key)) {
-            KeyCombo combo = binding.getCombo();
+    private List<CombindKeyBinding> collectMatches(InputKey key, int sequenceCount) {
+        List<CombindKeyBinding> matched = new ArrayList<>();
 
-            if (firedCombos != null && firedCombos.contains(combo))
-                continue;
+        for (CombindKeyBinding binding : CombindRegistry.INSTANCE.getByTrigger(key))
+            if (matches(binding.getCombo(), key, sequenceCount))
+                matched.add(binding);
 
-            if (!matches(combo, key, newCount))
-                continue;
+        return matched;
+    }
 
-            binding.setActive(true);
-            binding.addClick();
+    // When conflicts are OFF, only fire the most specific matched combos (most keys),
+    // deduplicating by key set so two identical combos don't both fire.
+    private static List<CombindKeyBinding> resolveConflicts(List<CombindKeyBinding> matched) {
+        if (CombindConfig.config.allowConflicts.get())
+            return matched;
 
-            PressContext ctx = new PressContext(binding, false);
+        int maxKeys = matched.stream()
+            .mapToInt(b -> comboKeySet(b.getCombo()).size())
+            .max()
+            .orElse(0);
 
-            for (var cb : binding.getPressCallbacks()) {
-                try {
-                    cb.accept(ctx);
-                } catch (Exception ignored) {}
-            }
+        Set<Set<InputKey>> seen = new HashSet<>();
+        List<CombindKeyBinding> result = new ArrayList<>();
 
-            activeBindings.add(binding);
+        for (CombindKeyBinding b : matched) {
+            Set<InputKey> ks = comboKeySet(b.getCombo());
 
-            if (firedCombos != null)
-                firedCombos.add(combo);
-
-            if (combo.isSequence())
-                seqStates.put(
-                    key,
-                    new SeqState(now, 0)
-                );
+            if (ks.size() == maxKeys && seen.add(ks))
+                result.add(b);
         }
+
+        return result;
+    }
+
+    private void activate(CombindKeyBinding binding, InputKey triggerKey, long now) {
+        binding.setActive(true);
+        binding.addClick();
+
+        PressContext ctx = new PressContext(binding, false);
+
+        for (var cb : binding.getPressCallbacks()) {
+            try {
+                cb.accept(ctx);
+            } catch (Exception ignored) {}
+        }
+
+        activeBindings.add(binding);
+
+        if (binding.getCombo().isSequence())
+            seqStates.put(triggerKey, new SeqState(now, 0));
     }
 
     private void handleRelease(InputKey key) {
@@ -163,6 +186,14 @@ public final class ComboInputTracker {
                 return true;
 
         return false;
+    }
+
+    private static Set<InputKey> comboKeySet(KeyCombo combo) {
+        Set<InputKey> keys = new HashSet<>(Arrays.asList(combo.modifiers()));
+
+        keys.add(combo.triggerKey());
+
+        return keys;
     }
 
     private boolean matches(KeyCombo combo, InputKey trigger, int sequenceSoFar) {

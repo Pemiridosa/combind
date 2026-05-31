@@ -14,7 +14,7 @@ import java.util.*;
  *
  * <p>A {@code KeyCombo} can describe:
  * <ul>
- *   <li>A single key (e.g. {@code A}, {@code Mouse Left})</li>
+ *   <li>A single key (e.g. {@code A}, {@code Left Button})</li>
  *   <li>A chord — multiple keys held simultaneously (e.g. {@code Shift+A})</li>
  *   <li>A sequence — the same key pressed multiple times quickly (e.g. {@code W W})</li>
  * </ul>

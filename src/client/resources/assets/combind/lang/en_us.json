@@ -5,7 +5,7 @@
   "combind.config.category.general": "General",
 
   "combind.config.allowConflicts": "Allow Conflicts",
-  "combind.config.allowConflicts.tooltip": "When enabled, all actions sharing a combo trigger together. Disable to have only the first registered action execute.",
+  "combind.config.allowConflicts.tooltip": "When disabled, pressing a combo won't also trigger simpler bindings whose keys are contained within it. For example, pressing Shift+E won't also trigger E.",
 
   "combind.config.sequenceWindowMs": "Sequence Window",
   "combind.config.sequenceWindowMs.tooltip": "How long after a key press the next press can still count as part of a sequence in-game.",

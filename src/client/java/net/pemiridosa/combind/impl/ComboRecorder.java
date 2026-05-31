@@ -29,7 +29,7 @@ import java.util.*;
  *       count increments; otherwise the result is committed on the next frame after
  *       the window expires.</li>
  *   <li><b>Mouse button</b>: immediately finalizes with any currently held keyboard
- *       keys as modifiers (e.g. Shift + Mouse Left).</li>
+ *       keys as modifiers (e.g. Shift + Left Button).</li>
  * </ul>
  */
 public final class ComboRecorder {
