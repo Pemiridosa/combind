@@ -5,7 +5,7 @@
   "combind.config.category.general": "General",
 
   "combind.config.allowConflicts": "Permitir Conflictos",
-  "combind.config.allowConflicts.tooltip": "Cuando está desactivado, pulsar un combo no activará atajos cuyas teclas estén completamente contenidas en él. Por ejemplo, pulsar Shift+E no activará también E.",
+  "combind.config.allowConflicts.tooltip": "Cuando está desactivado, pulsar un combo no activará atajos cuyas teclas estén completamente contenidas en él. Por ejemplo, pulsar Left Shift + E no activará también E.",
 
   "combind.config.sequenceWindowMs": "Ventana de Secuencia",
   "combind.config.sequenceWindowMs.tooltip": "Tiempo disponible tras una pulsación para que la siguiente aún forme parte de la secuencia, en el juego.",

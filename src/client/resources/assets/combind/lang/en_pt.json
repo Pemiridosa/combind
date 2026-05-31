@@ -5,7 +5,7 @@
   "combind.config.category.general": "Generrrral",
 
   "combind.config.allowConflicts": "Allow Skirmishes",
-  "combind.config.allowConflicts.tooltip": "When disabled, pressin' a combo won't also trigger simpler bindings whose keys be contained within it. For example, pressin' Shift+E won't also trigger E.",
+  "combind.config.allowConflicts.tooltip": "When disabled, pressin' a combo won't also trigger simpler bindings whose keys be contained within it. For example, pressin' Left Shift + E won't also trigger E.",
 
   "combind.config.sequenceWindowMs": "Sequence Port'ole",
   "combind.config.sequenceWindowMs.tooltip": "How long after a key press th' next can still be counted as part o' th' sequence in-game.",

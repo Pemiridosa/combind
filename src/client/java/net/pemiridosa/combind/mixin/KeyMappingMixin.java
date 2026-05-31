@@ -162,7 +162,7 @@ public abstract class KeyMappingMixin {
     /**
      * Two Combind bindings conflict if their key sets overlap — i.e. any key
      * (trigger or modifier) from one combo appears in the other. This means
-     * {@code Shift+F} conflicts with both {@code F} (same trigger) and
+     * {@code Left Shift + F} conflicts with both {@code F} (same trigger) and
      * {@code Shift} (modifier used as trigger elsewhere), for example.
      */
     @Inject(

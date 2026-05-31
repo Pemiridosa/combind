@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Intercepts raw mouse button events so that Combind combos with mouse button
- * triggers (e.g. Left Button, Shift + Right Button) are tracked in-game, the
+ * triggers (e.g. Left Button, Left Shift + Right Button) are tracked in-game, the
  * same way keyboard events are fed to {@link ComboInputTracker} via
  * {@link KeyboardHandlerMixin}.
  *

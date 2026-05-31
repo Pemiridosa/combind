@@ -15,7 +15,7 @@ import java.util.*;
  * <p>A {@code KeyCombo} can describe:
  * <ul>
  *   <li>A single key (e.g. {@code A}, {@code Left Button})</li>
- *   <li>A chord — multiple keys held simultaneously (e.g. {@code Shift+A})</li>
+ *   <li>A chord — multiple keys held simultaneously (e.g. {@code Left Shift + A})</li>
  *   <li>A sequence — the same key pressed multiple times quickly (e.g. {@code W W})</li>
  * </ul>
  *
@@ -159,7 +159,7 @@ public record KeyCombo(InputKey triggerKey, InputKey[] modifiers, int sequenceCo
      * Used by {@code KeyMapping.same()} override to drive the Controls screen's
      * yellow conflict indicator.
      *
-     * <p>Examples: {@code Shift+F} overlaps {@code F} (same trigger) and also
+     * <p>Examples: {@code Left Shift + F} overlaps {@code F} (same trigger) and also
      * overlaps {@code Shift} (Shift is a modifier of one and trigger of the other).
      */
     public boolean overlaps(KeyCombo other) {

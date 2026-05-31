@@ -162,7 +162,7 @@ public final class CombindKeyBinding {
     // ── Display ───────────────────────────────────────────────────────────────
 
     /**
-     * Returns the display name of the current combo, e.g. {@code "Shift + A"}.
+     * Returns the display name of the current combo, e.g. {@code "Left Shift + A"}.
      */
     public String getComboDisplayName() {
         return combo.getDisplayName();
