@@ -1,12 +1,13 @@
 package net.pemiridosa.combind.mixin;
 
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
 import net.pemiridosa.combind.api.CombindKeyBinding;
 import net.pemiridosa.combind.impl.CombindRegistry;
+import net.pemiridosa.combind.mixin.accessor.AbstractSelectionListAccessor;
 import net.pemiridosa.combind.mixin.accessor.KeyEntryAccessor;
 import net.pemiridosa.combind.ui.CombindAlternativeEntry;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,30 +22,31 @@ import java.util.List;
  */
 @Mixin(KeyBindsList.class)
 public abstract class KeyBindsListMixin {
-    @Shadow protected abstract void clearEntries();
-    @Shadow protected abstract int addEntry(KeyBindsList.Entry entry, int height);
-
     @Inject(method = "resetMappingAndUpdateButtons", at = @At("RETURN"))
     private void combind$insertAlternatives(CallbackInfo ci) {
-        // Snapshot current entries (vanilla primaries + any stale alternatives)
-        List<KeyBindsList.Entry> snapshot = new ArrayList<>(((KeyBindsList)(Object)this).children());
+        AbstractSelectionListAccessor acc = (AbstractSelectionListAccessor)(Object)this;
 
-        // Remove stale alternative entries, keep primary entries
-        clearEntries();
+        // Snapshot current entries (vanilla primaries + any stale alternatives from a previous call)
+        @SuppressWarnings("unchecked")
+        List<KeyBindsList.Entry> snapshot = new ArrayList<>((List<KeyBindsList.Entry>)(List<?>)acc.getChildren());
+
+        // Rebuild the list, inserting fresh alternative entries after each primary
+        acc.invokeClearEntries();
 
         KeyBindsList self = (KeyBindsList)(Object)this;
 
         for (KeyBindsList.Entry entry : snapshot) {
-            if (entry instanceof CombindAlternativeEntry) continue; // re-insert fresh below
+            if (entry instanceof CombindAlternativeEntry) continue;
 
-            addEntry(entry, 20);
+            @SuppressWarnings("unchecked")
+            AbstractSelectionList.Entry<?> e = (AbstractSelectionList.Entry<?>) entry;
+            acc.invokeAddEntry(e, 20);
 
-            // After each primary KeyEntry, insert fresh alternatives
             if (entry instanceof KeyEntryAccessor keyEntry) {
                 CombindKeyBinding binding = CombindRegistry.INSTANCE.get(keyEntry.getKey());
                 if (binding != null && binding.comboCount() > 1) {
                     for (int i = 1; i < binding.comboCount(); i++) {
-                        addEntry(new CombindAlternativeEntry(self, binding, i, keyEntry.getName()), 20);
+                        acc.invokeAddEntry(new CombindAlternativeEntry(self, binding, i, keyEntry.getName()), 20);
                     }
                 }
             }

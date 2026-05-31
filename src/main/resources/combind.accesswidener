@@ -1,3 +1,4 @@
 accessWidener v2 official
 
 accessible method net/minecraft/client/gui/screens/options/controls/KeyBindsList$Entry refreshEntry ()V
+accessible class net/minecraft/client/gui/components/AbstractSelectionList$Entry
