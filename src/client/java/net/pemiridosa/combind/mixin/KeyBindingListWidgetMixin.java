@@ -12,6 +12,7 @@ import net.pemiridosa.combind.api.CombindKeyBinding;
 import net.pemiridosa.combind.api.KeyCombo;
 import net.pemiridosa.combind.impl.CombindConfig;
 import net.pemiridosa.combind.impl.CombindRegistry;
+import net.pemiridosa.combind.ui.CombindAlternativeEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -36,6 +37,7 @@ public abstract class KeyBindingListWidgetMixin {
         at = @At("TAIL")
     )
     private void combind$onInit(KeyBindsList list, KeyMapping mapping, Component name, CallbackInfo ci) {
+        if ((Object)this instanceof CombindAlternativeEntry) return;
         combind$list = list;
 
         CombindKeyBinding binding = CombindRegistry.INSTANCE.get(mapping);

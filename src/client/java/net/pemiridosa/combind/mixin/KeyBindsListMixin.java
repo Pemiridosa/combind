@@ -2,6 +2,7 @@ package net.pemiridosa.combind.mixin;
 
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
+import net.minecraft.network.chat.Component;
 import net.pemiridosa.combind.api.CombindKeyBinding;
 import net.pemiridosa.combind.impl.CombindRegistry;
 import net.pemiridosa.combind.mixin.accessor.AbstractSelectionListAccessor;
@@ -45,8 +46,9 @@ public abstract class KeyBindsListMixin {
             if (entry instanceof KeyEntryAccessor keyEntry) {
                 CombindKeyBinding binding = CombindRegistry.INSTANCE.get(keyEntry.getKey());
                 if (binding != null && binding.comboCount() > 1) {
+                    Component actionName = Component.translatable(keyEntry.getKey().getName());
                     for (int i = 1; i < binding.comboCount(); i++) {
-                        acc.invokeAddEntry(new CombindAlternativeEntry(self, binding, i, keyEntry.getName()), 20);
+                        acc.invokeAddEntry(new CombindAlternativeEntry(self, binding, i, actionName), 20);
                     }
                 }
             }

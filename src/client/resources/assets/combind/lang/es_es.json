@@ -11,5 +11,8 @@
   "combind.config.sequenceWindowMs.tooltip": "Tiempo disponible tras una pulsación para que la siguiente aún forme parte de la secuencia, en el juego.",
 
   "combind.config.sequenceRecordingWindowMs": "Ventana de Entrada de Secuencia",
-  "combind.config.sequenceRecordingWindowMs.tooltip": "Cuánto tiempo esperar por la siguiente pulsación antes de finalizar una secuencia, en la pantalla de Teclas."
+  "combind.config.sequenceRecordingWindowMs.tooltip": "Cuánto tiempo esperar por la siguiente pulsación antes de finalizar una secuencia, en la pantalla de Teclas.",
+
+  "combind.ui.addAlternativeBind": "Añadir atajo alternativo",
+  "combind.ui.removeAlternativeBind": "Eliminar atajo alternativo"
 }

@@ -1,6 +1,7 @@
 package net.pemiridosa.combind.mixin.accessor;
 
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,4 +14,10 @@ public interface KeyEntryAccessor {
 
     @Accessor("name")
     Component getName();
+
+    @Accessor("changeButton")
+    Button getChangeButton();
+
+    @Accessor("resetButton")
+    Button getResetButton();
 }

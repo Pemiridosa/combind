@@ -11,5 +11,8 @@
   "combind.config.sequenceWindowMs.tooltip": "Tempo disponível após uma tecla para que a seguinte ainda faça parte da sequência, no jogo.",
 
   "combind.config.sequenceRecordingWindowMs": "Janela de Entrada da Sequência",
-  "combind.config.sequenceRecordingWindowMs.tooltip": "Quanto tempo aguardar pela próxima tecla antes de finalizar uma sequência, na tela de Atalhos."
+  "combind.config.sequenceRecordingWindowMs.tooltip": "Quanto tempo aguardar pela próxima tecla antes de finalizar uma sequência, na tela de Atalhos.",
+
+  "combind.ui.addAlternativeBind": "Adicionar atalho alternativo",
+  "combind.ui.removeAlternativeBind": "Remover atalho alternativo"
 }

@@ -46,6 +46,18 @@ public abstract class KeyBindsScreenMixin {
     @Shadow private KeyBindsList keyBindsList;
 
     /**
+     * After vanilla finishes populating the key binds list, refresh it so that
+     * alternative combos already in config are visible immediately on open.
+     * addContents() is where KeyBindsList is created and first populated in
+     * KeyBindsScreen; our KeyBindsListMixin hook on resetMappingAndUpdateButtons()
+     * needs one explicit call here to insert alternatives on initial load.
+     */
+    @Inject(method = "addContents()V", at = @At("TAIL"))
+    private void combind$afterAddContents(CallbackInfo ci) {
+        keyBindsList.resetMappingAndUpdateButtons();
+    }
+
+    /**
      * When recording is active and the user clicks a mouse button, capture it
      * as the new binding immediately (before vanilla processes the click).
      */
