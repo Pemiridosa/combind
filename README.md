@@ -5,9 +5,9 @@ It is **client-side only** and requires no server-side installation.
 ## Features
 
 ### Chord Combos
-- Bind actions to key combinations such as **Shift + E**, **Ctrl + Left Button**, or any other modifier + trigger pair
-- Any key or mouse button can serve as either a modifier or the trigger. The last key pressed during recording becomes the trigger, and all previously held keys become modifiers
-- No limits! Stack as many modifier keys as you want for as wild a combination as you need
+- Bind actions to key combinations such as **Shift + E**, **Ctrl + Left Button**, or any other held key + trigger pair
+- Any key or mouse button can be the trigger or a held key in a combo. The last key pressed during recording becomes the trigger, and all previously held keys complete the combination
+- No limits! Hold as many keys as you want for as wild a combination as you need
 
 ### Sequence Combos
 - Bind actions to repeated key presses such as **double-tap Q** or **triple-tap Space**
