@@ -4,11 +4,15 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"KeyBindsScreenMixin",
+		"KeyBindingListWidgetMixin",
+		"KeyBindsListMixin",
 		"KeyboardHandlerMixin",
 		"KeyMappingMixin",
 		"MinecraftMixin",
 		"MouseHandlerMixin",
-		"GameOptionsMixin"
+		"GameOptionsMixin",
+		"accessor.KeyEntryAccessor",
+		"accessor.KeyBindsListAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

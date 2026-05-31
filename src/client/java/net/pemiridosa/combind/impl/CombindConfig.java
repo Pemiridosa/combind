@@ -63,8 +63,14 @@ public final class CombindConfig {
             cfg.add(e.getKey(), e.getValue().toJson());
 
         JsonObject keyBinds = new JsonObject();
-        for (CombindKeyBinding b : CombindRegistry.INSTANCE.getAll())
-            keyBinds.add(b.getVanillaMapping().getName(), b.getCombo().toJson());
+        for (CombindKeyBinding b : CombindRegistry.INSTANCE.getAll()) {
+            JsonArray combosArr = new JsonArray();
+            for (KeyCombo c : b.getCombos())
+                combosArr.add(c.toJson());
+            JsonObject entry = new JsonObject();
+            entry.add("combos", combosArr);
+            keyBinds.add(b.getVanillaMapping().getName(), entry);
+        }
 
         JsonObject root = new JsonObject();
         root.add("config", cfg);
@@ -115,7 +121,20 @@ public final class CombindConfig {
                     continue;
 
                 try {
-                    b.setCombo(KeyCombo.fromJson(el.getAsJsonObject()));
+                    JsonObject obj = el.getAsJsonObject();
+
+                    if (obj.has("combos") && obj.get("combos").isJsonArray()) {
+                        // current format: {"combos": [{...}, ...]}
+                        JsonArray arr = obj.getAsJsonArray("combos");
+                        for (int i = 0; i < arr.size(); i++) {
+                            KeyCombo combo = KeyCombo.fromJson(arr.get(i).getAsJsonObject());
+                            if (i == 0) b.setCombo(0, combo);
+                            else        b.addCombo(combo);
+                        }
+                    } else {
+                        // legacy format: bare combo object
+                        b.setCombo(0, KeyCombo.fromJson(obj));
+                    }
                 } catch (Exception e) {
                     LOGGER.warn("Could not parse combo for '{}', skipping: {}", name, e.getMessage());
                 }

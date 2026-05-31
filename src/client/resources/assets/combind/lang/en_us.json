@@ -11,5 +11,8 @@
   "combind.config.sequenceWindowMs.tooltip": "How long after a key press the next press can still count as part of a sequence in-game.",
 
   "combind.config.sequenceRecordingWindowMs": "Sequence Input Window",
-  "combind.config.sequenceRecordingWindowMs.tooltip": "How long to wait for the next press before finalizing a sequence in the Key Binds screen."
+  "combind.config.sequenceRecordingWindowMs.tooltip": "How long to wait for the next press before finalizing a sequence in the Key Binds screen.",
+
+  "combind.ui.addAlternativeBind": "Add alternative bind",
+  "combind.ui.removeAlternativeBind": "Remove alternative bind"
 }

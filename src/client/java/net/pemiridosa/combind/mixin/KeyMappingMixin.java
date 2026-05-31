@@ -177,10 +177,16 @@ public abstract class KeyMappingMixin {
         if (thisBinding == null || otherBinding == null)
             return; // non-Combind: let vanilla handle
 
-        KeyCombo thisCombo  = thisBinding.getCombo();
-        KeyCombo otherCombo = otherBinding.getCombo();
+        for (KeyCombo thisCombo : thisBinding.getCombos()) {
+            for (KeyCombo otherCombo : otherBinding.getCombos()) {
+                if (thisCombo.overlaps(otherCombo)) {
+                    cir.setReturnValue(true);
+                    return;
+                }
+            }
+        }
 
-        cir.setReturnValue(thisCombo.overlaps(otherCombo));
+        cir.setReturnValue(false);
     }
 
     /** Reflects the Combind combo's unbound state into vanilla's isUnbound() check. */

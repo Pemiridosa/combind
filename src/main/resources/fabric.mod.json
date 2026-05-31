@@ -12,6 +12,7 @@
 	},
 	"license": "MIT",
 	"icon": "assets/combind/icon.png",
+	"accessWidener": "combind.accesswidener",
 	"environment": "client",
 	"entrypoints": {
 		"client": [

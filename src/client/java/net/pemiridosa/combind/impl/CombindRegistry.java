@@ -2,6 +2,7 @@ package net.pemiridosa.combind.impl;
 
 import net.pemiridosa.combind.api.CombindKeyBinding;
 import net.pemiridosa.combind.api.InputKey;
+import net.pemiridosa.combind.api.KeyCombo;
 import net.minecraft.client.KeyMapping;
 
 import java.util.*;
@@ -45,8 +46,12 @@ public final class CombindRegistry {
         List<CombindKeyBinding> result = new ArrayList<>();
 
         for (CombindKeyBinding b : all) {
-            if (b.getCombo().triggerKey().equals(key))
-                result.add(b);
+            for (KeyCombo c : b.getCombos()) {
+                if (c.triggerKey().equals(key)) {
+                    result.add(b);
+                    break;
+                }
+            }
         }
 
         return result;

@@ -41,6 +41,7 @@ public final class ComboRecorder {
     private boolean finished = false;
 
     private CombindKeyBinding targetBinding = null;
+    private int targetComboIndex = 0;
 
     private final LinkedHashSet<InputKey> held = new LinkedHashSet<>();
     private final List<InputKey> pressOrder = new ArrayList<>();
@@ -63,7 +64,12 @@ public final class ComboRecorder {
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     public void startRecording(CombindKeyBinding binding) {
+        startRecording(binding, 0);
+    }
+
+    public void startRecording(CombindKeyBinding binding, int comboIndex) {
         targetBinding = binding;
+        targetComboIndex = comboIndex;
 
         startRecording();
     }
@@ -91,6 +97,10 @@ public final class ComboRecorder {
         return targetBinding;
     }
 
+    public int getTargetComboIndex() {
+        return targetComboIndex;
+    }
+
     /**
      * Returns true when a result is ready. Also commits a pending single-key
      * result once the sequence window has expired — called every frame via the
@@ -111,6 +121,7 @@ public final class ComboRecorder {
         finished = false;
         pendingFinalize = false;
         targetBinding = null;
+        targetComboIndex = 0;
 
         KeyCombo r = result != null
             ? result

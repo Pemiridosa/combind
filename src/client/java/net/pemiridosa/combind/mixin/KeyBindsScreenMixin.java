@@ -119,22 +119,17 @@ public abstract class KeyBindsScreenMixin {
 
     @Unique
     private void combind$applyFinishedRecording() {
+        CombindKeyBinding binding = ComboRecorder.INSTANCE.getTargetBinding();
+        int comboIndex = ComboRecorder.INSTANCE.getTargetComboIndex();
         KeyCombo newCombo = ComboRecorder.INSTANCE.finish();
 
-        // selectedKey might have been cleared if the user canceled some other way
-        if (selectedKey == null)
+        if (binding == null)
             return;
 
-        CombindKeyBinding binding = CombindRegistry.INSTANCE.get(selectedKey);
-
-        if (binding != null) {
-            binding.setCombo(newCombo);
-
-            CombindConfig.save();
-        }
+        binding.setCombo(comboIndex, newCombo);
+        CombindConfig.save();
 
         selectedKey = null;
-
         keyBindsList.resetMappingAndUpdateButtons();
     }
 }

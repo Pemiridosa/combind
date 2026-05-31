@@ -23,9 +23,12 @@ public final class ComboInputTracker {
 
     private final Set<InputKey> heldKeys = new HashSet<>();
     private final Map<InputKey, SeqState> seqStates = new HashMap<>();
-    private final Set<CombindKeyBinding> activeBindings = new HashSet<>();
+
+    // Maps each active binding to the specific combo that triggered it (for correct release detection).
+    private final Map<CombindKeyBinding, KeyCombo> activeBindings = new LinkedHashMap<>();
 
     private record SeqState(long lastPressMs, int count) {}
+    private record MatchResult(CombindKeyBinding binding, KeyCombo combo) {}
 
     private ComboInputTracker() {}
 
@@ -34,7 +37,7 @@ public final class ComboInputTracker {
      * that any in-flight combo activations are canceled.
      */
     public void releaseAll() {
-        for (CombindKeyBinding b : activeBindings) {
+        for (CombindKeyBinding b : activeBindings.keySet()) {
             b.setActive(false);
         }
 
@@ -84,11 +87,11 @@ public final class ComboInputTracker {
 
         long now = System.currentTimeMillis();
         int sequenceCount = advanceSequence(key, now);
-        List<CombindKeyBinding> matched = collectMatches(key, sequenceCount);
-        List<CombindKeyBinding> toFire = resolveConflicts(matched);
+        List<MatchResult> matched = collectMatches(key, sequenceCount);
+        List<MatchResult> toFire = resolveConflicts(matched);
 
-        for (CombindKeyBinding binding : toFire)
-            activate(binding, key, now);
+        for (MatchResult match : toFire)
+            activate(match, key, now);
     }
 
     private int advanceSequence(InputKey key, long now) {
@@ -103,12 +106,28 @@ public final class ComboInputTracker {
         return count;
     }
 
-    private List<CombindKeyBinding> collectMatches(InputKey key, int sequenceCount) {
-        List<CombindKeyBinding> matched = new ArrayList<>();
+    // For each binding, find the best-matching combo (most keys, then lowest sequence count).
+    // Returns at most one MatchResult per binding.
+    private List<MatchResult> collectMatches(InputKey key, int sequenceCount) {
+        List<MatchResult> matched = new ArrayList<>();
 
-        for (CombindKeyBinding binding : CombindRegistry.INSTANCE.getByTrigger(key))
-            if (matches(binding.getCombo(), key, sequenceCount))
-                matched.add(binding);
+        for (CombindKeyBinding binding : CombindRegistry.INSTANCE.getByTrigger(key)) {
+            KeyCombo best = null;
+
+            for (KeyCombo combo : binding.getCombos()) {
+                if (!matches(combo, key, sequenceCount)) continue;
+
+                if (best == null
+                        || comboKeySet(combo).size() > comboKeySet(best).size()
+                        || (comboKeySet(combo).size() == comboKeySet(best).size()
+                            && combo.sequenceCount() < best.sequenceCount())) {
+                    best = combo;
+                }
+            }
+
+            if (best != null)
+                matched.add(new MatchResult(binding, best));
+        }
 
         return matched;
     }
@@ -117,35 +136,38 @@ public final class ComboInputTracker {
     // Specificity: most keys first, then lowest sequence count within the same key set
     // (a single press should win over a double-tap — no waiting for a tap that may never come).
     // Deduplicates by key set so two identical combos don't both fire.
-    private static List<CombindKeyBinding> resolveConflicts(List<CombindKeyBinding> matched) {
+    private static List<MatchResult> resolveConflicts(List<MatchResult> matched) {
         if (CombindConfig.config.allowConflicts.get())
             return matched;
 
         int maxKeys = matched.stream()
-            .mapToInt(b -> comboKeySet(b.getCombo()).size())
+            .mapToInt(m -> comboKeySet(m.combo()).size())
             .max()
             .orElse(0);
 
         int minSeq = matched.stream()
-            .filter(b -> comboKeySet(b.getCombo()).size() == maxKeys)
-            .mapToInt(b -> b.getCombo().sequenceCount())
+            .filter(m -> comboKeySet(m.combo()).size() == maxKeys)
+            .mapToInt(m -> m.combo().sequenceCount())
             .min()
             .orElse(1);
 
         Set<Set<InputKey>> seen = new HashSet<>();
-        List<CombindKeyBinding> result = new ArrayList<>();
+        List<MatchResult> result = new ArrayList<>();
 
-        for (CombindKeyBinding b : matched) {
-            Set<InputKey> ks = comboKeySet(b.getCombo());
+        for (MatchResult m : matched) {
+            Set<InputKey> ks = comboKeySet(m.combo());
 
-            if (ks.size() == maxKeys && b.getCombo().sequenceCount() == minSeq && seen.add(ks))
-                result.add(b);
+            if (ks.size() == maxKeys && m.combo().sequenceCount() == minSeq && seen.add(ks))
+                result.add(m);
         }
 
         return result;
     }
 
-    private void activate(CombindKeyBinding binding, InputKey triggerKey, long now) {
+    private void activate(MatchResult match, InputKey triggerKey, long now) {
+        CombindKeyBinding binding = match.binding();
+        KeyCombo combo = match.combo();
+
         binding.setActive(true);
         binding.addClick();
 
@@ -157,19 +179,21 @@ public final class ComboInputTracker {
             } catch (Exception ignored) {}
         }
 
-        activeBindings.add(binding);
+        activeBindings.put(binding, combo);
 
-        if (binding.getCombo().isSequence())
+        if (combo.isSequence())
             seqStates.put(triggerKey, new SeqState(now, 0));
     }
 
     private void handleRelease(InputKey key) {
-        Iterator<CombindKeyBinding> it = activeBindings.iterator();
+        Iterator<Map.Entry<CombindKeyBinding, KeyCombo>> it = activeBindings.entrySet().iterator();
 
         while (it.hasNext()) {
-            CombindKeyBinding binding = it.next();
+            Map.Entry<CombindKeyBinding, KeyCombo> entry = it.next();
+            CombindKeyBinding binding = entry.getKey();
+            KeyCombo combo = entry.getValue();
 
-            if (shouldDeactivate(binding.getCombo(), key)) {
+            if (shouldDeactivate(combo, key)) {
                 binding.setActive(false);
 
                 PressContext ctx = new PressContext(binding, true);

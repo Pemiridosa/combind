@@ -21,6 +21,9 @@ import java.util.function.Consumer;
  *
  * binding.onPress(ctx -> System.out.println("pressed!"));
  * binding.onRelease(ctx -> System.out.println("released!"));
+ *
+ * // Add alternative combos:
+ * binding.addCombo(new KeyCombo(InputKey.keyboard(GLFW.GLFW_KEY_F)));
  * }</pre>
  *
  * <p>Register your {@link KeyMapping} with Fabric's {@code KeyBindingHelper} as usual.
@@ -29,8 +32,8 @@ import java.util.function.Consumer;
 public final class CombindKeyBinding {
     private final KeyMapping vanillaMapping;
 
-    /** Current combo. May be changed by the player in the Controls screen. */
-    private KeyCombo combo;
+    /** All combos for this binding. Index 0 is the primary combo. */
+    private final List<KeyCombo> combos = new ArrayList<>();
 
     // In-game activation state — read by KeyMappingMixin to drive isDown()/consumeClick()
     private volatile boolean active = false;
@@ -42,7 +45,7 @@ public final class CombindKeyBinding {
 
     private CombindKeyBinding(KeyMapping vanillaMapping, KeyCombo initialCombo) {
         this.vanillaMapping = vanillaMapping;
-        this.combo = initialCombo;
+        this.combos.add(initialCombo);
     }
 
     /**
@@ -86,18 +89,51 @@ public final class CombindKeyBinding {
         return vanillaMapping;
     }
 
-    /** Returns the current {@link KeyCombo} for this binding. */
+    /** Returns the primary combo (index 0). */
     public KeyCombo getCombo() {
-        return combo;
+        return combos.get(0);
     }
 
-    /** Called by Combind internals when the player changes the combo. */
-    public void setCombo(KeyCombo combo) {
-        this.combo = combo;
+    /** Returns an unmodifiable view of all combos for this binding. */
+    public List<KeyCombo> getCombos() {
+        return Collections.unmodifiableList(combos);
+    }
 
-        // Reset activation state whenever the combo changes
+    /** Returns the number of combos (primary + alternatives). */
+    public int comboCount() {
+        return combos.size();
+    }
+
+    /**
+     * Sets the combo at the given index. Index 0 is the primary combo.
+     * Resets activation state.
+     */
+    public void setCombo(int index, KeyCombo combo) {
+        combos.set(index, combo);
         active = false;
         pendingClicks = 0;
+    }
+
+    /** Sets the primary combo. Shorthand for {@code setCombo(0, combo)}. */
+    public void setCombo(KeyCombo combo) {
+        setCombo(0, combo);
+    }
+
+    /**
+     * Adds an alternative combo. Returns {@code this} for chaining.
+     */
+    public CombindKeyBinding addCombo(KeyCombo combo) {
+        combos.add(combo);
+        return this;
+    }
+
+    /**
+     * Removes the combo at the given index. Index 0 (primary) cannot be removed.
+     * Does nothing if {@code index} is out of range or 0.
+     */
+    public void removeCombo(int index) {
+        if (index <= 0 || index >= combos.size()) return;
+        combos.remove(index);
     }
 
     // ── In-game state (used by KeyMappingMixin) ───────────────────────────────
@@ -161,16 +197,14 @@ public final class CombindKeyBinding {
 
     // ── Display ───────────────────────────────────────────────────────────────
 
-    /**
-     * Returns the display name of the current combo, e.g. {@code "Left Shift + A"}.
-     */
+    /** Returns the display name of the primary combo, e.g. {@code "Left Shift + A"}. */
     public String getComboDisplayName() {
-        return combo.getDisplayName();
+        return getCombo().getDisplayName();
     }
 
     @Override
     public String toString() {
-        return "CombindKeyBinding{" + vanillaMapping.getName() + " -> " + combo + "}";
+        return "CombindKeyBinding{" + vanillaMapping.getName() + " -> " + combos + "}";
     }
 
     // ── Inner Types ───────────────────────────────────────────────────────────
