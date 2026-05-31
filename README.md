@@ -41,4 +41,6 @@ This mod has no required dependencies beyond Fabric API. It works with:
 ---
 
 
+_**Note**: Some niche vanilla interactions are tied to a specific input type and may not work when rebound. For example, a mouse button bound to "Open Inventory" will not close it the way a key would, and a key bound to "Pick Block" will not support block duplication dragging inside containers the way a mouse button would._
+
 _**Note**: If you encounter any compatibility issues, please report them on the [GitHub Issues page](https://github.com/Pemiridosa/combind/issues)._
