@@ -19,7 +19,7 @@ It is **client-side only** and requires no server-side installation.
 - Press **Escape** to unbind a key
 
 ### Configuration
-- **Allow Conflicts**: When disabled, pressing a combo will not also trigger bindings whose keys are fully contained in it. For example, binding both **E** and **Shift + E** means pressing **Shift + E** would normally fire both. Disabling this ensures only **Shift + E** fires. Two bindings like **Ctrl + E** and **Shift + E** are not considered conflicting, since pressing one can never accidentally fire the other. They only both trigger if you deliberately hold **Ctrl + Shift + E**. This setting only applies to bindings that share the same trigger key (default: on)
+- **Allow Conflicts**: When disabled, pressing a combo will not also trigger bindings whose keys are fully contained in it. For example, binding both **E** and **Shift + E** means pressing **Shift + E** would normally fire both. Disabling this ensures only **Shift + E** fires. The same applies to sequences: if a single press and a multi-tap are bound to the same key (e.g. **Q** and **Q Q**), pressing that key will only trigger the single press binding. Two bindings like **Ctrl + E** and **Shift + E** are not considered conflicting, since pressing one can never accidentally fire the other. They only both trigger if you deliberately hold **Ctrl + Shift + E**. This setting only applies to bindings that share the same trigger key (default: on)
 - **Sequence Window**: How quickly you must press the key repeatedly in-game for a sequence to register (default: 400 ms)
 - **Sequence Recording Window**: How long the recorder waits between taps when capturing a sequence in the Controls screen (default: 200 ms)
 - Settings are saved to `config/combind.json`
