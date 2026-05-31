@@ -113,8 +113,10 @@ public final class ComboInputTracker {
         return matched;
     }
 
-    // When conflicts are OFF, only fire the most specific matched combos (most keys),
-    // deduplicating by key set so two identical combos don't both fire.
+    // When conflicts are OFF, only fire the most specific matched combos.
+    // Specificity: most keys first, then lowest sequence count within the same key set
+    // (a single press should win over a double-tap — no waiting for a tap that may never come).
+    // Deduplicates by key set so two identical combos don't both fire.
     private static List<CombindKeyBinding> resolveConflicts(List<CombindKeyBinding> matched) {
         if (CombindConfig.config.allowConflicts.get())
             return matched;
@@ -124,13 +126,19 @@ public final class ComboInputTracker {
             .max()
             .orElse(0);
 
+        int minSeq = matched.stream()
+            .filter(b -> comboKeySet(b.getCombo()).size() == maxKeys)
+            .mapToInt(b -> b.getCombo().sequenceCount())
+            .min()
+            .orElse(1);
+
         Set<Set<InputKey>> seen = new HashSet<>();
         List<CombindKeyBinding> result = new ArrayList<>();
 
         for (CombindKeyBinding b : matched) {
             Set<InputKey> ks = comboKeySet(b.getCombo());
 
-            if (ks.size() == maxKeys && seen.add(ks))
+            if (ks.size() == maxKeys && b.getCombo().sequenceCount() == minSeq && seen.add(ks))
                 result.add(b);
         }
 
