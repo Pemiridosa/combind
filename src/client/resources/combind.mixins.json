@@ -12,7 +12,6 @@
 		"MouseHandlerMixin",
 		"GameOptionsMixin",
 		"accessor.KeyEntryAccessor",
-		"accessor.KeyBindsListAccessor",
 		"accessor.AbstractSelectionListAccessor"
 	],
 	"injectors": {

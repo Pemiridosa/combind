@@ -13,7 +13,7 @@ import net.pemiridosa.combind.api.CombindKeyBinding;
 import net.pemiridosa.combind.api.KeyCombo;
 import net.pemiridosa.combind.impl.CombindConfig;
 import net.pemiridosa.combind.impl.ComboRecorder;
-import net.pemiridosa.combind.mixin.accessor.KeyBindsListAccessor;
+import net.pemiridosa.combind.mixin.accessor.AbstractSelectionListAccessor;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class CombindAlternativeEntry extends KeyBindsList.Entry {
 
     @Override
     public void extractContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, boolean active, float partialTick) {
-        int rightEdge = ((KeyBindsListAccessor) list).invokeScrollBarX();
+        int rightEdge = ((AbstractSelectionListAccessor)(Object) list).invokeScrollBarX();
         int y = getContentY() - 2;
 
         // Position remove button at right edge

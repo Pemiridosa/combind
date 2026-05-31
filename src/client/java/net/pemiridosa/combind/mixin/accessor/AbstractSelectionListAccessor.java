@@ -17,4 +17,7 @@ public interface AbstractSelectionListAccessor {
 
     @Invoker("addEntry")
     int invokeAddEntry(AbstractSelectionList.Entry<?> entry, int height);
+
+    @Invoker("scrollBarX")
+    int invokeScrollBarX();
 }
