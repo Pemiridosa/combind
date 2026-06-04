@@ -69,6 +69,9 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_$projectName"}
 	}
+
+	exclude "**/*.aseprite"
+	exclude "**/*_scaled.png"
 }
 
 // configure the maven publication
