@@ -12,7 +12,7 @@ import java.util.*;
  *
  * <h2>Recording protocol</h2>
  * <ol>
- *   <li>Call {@link #startRecording(CombindKeyBinding)} when the user clicks a binding row.</li>
+ *   <li>Call {@link #startRecording()} when the user clicks a binding row.</li>
  *   <li>Feed key events via {@link #onKey(int, int)} and mouse events via
  *       {@link #onMouseButton(int, int)}.</li>
  *   <li>Poll {@link #isFinished()}; when {@code true} call {@link #finish()}
@@ -43,8 +43,6 @@ public final class ComboRecorder {
     private boolean recording = false;
     private boolean finished = false;
 
-    private CombindKeyBinding targetBinding = null;
-
     private final LinkedHashSet<InputKey> held = new LinkedHashSet<>();
     private final List<InputKey> pressOrder = new ArrayList<>();
 
@@ -64,12 +62,6 @@ public final class ComboRecorder {
     private ComboRecorder() {}
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
-
-    public void startRecording(CombindKeyBinding binding) {
-        targetBinding = binding;
-
-        startRecording();
-    }
 
     public void startRecording() {
         recording = true;
@@ -109,7 +101,6 @@ public final class ComboRecorder {
         recording = false;
         finished = false;
         pendingFinalize = false;
-        targetBinding = null;
 
         KeyCombo r = result != null
             ? result
