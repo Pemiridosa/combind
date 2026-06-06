@@ -29,6 +29,9 @@ import java.util.function.Consumer;
 public final class CombindKeyBinding {
     private final KeyMapping vanillaMapping;
 
+    /** The combo as originally registered — restored on reset. */
+    private final KeyCombo defaultCombo;
+
     /** Current combo. May be changed by the player in the Controls screen. */
     private KeyCombo combo;
 
@@ -42,6 +45,7 @@ public final class CombindKeyBinding {
 
     private CombindKeyBinding(KeyMapping vanillaMapping, KeyCombo initialCombo) {
         this.vanillaMapping = vanillaMapping;
+        this.defaultCombo = initialCombo;
         this.combo = initialCombo;
     }
 
@@ -84,6 +88,11 @@ public final class CombindKeyBinding {
     /** Returns the underlying vanilla {@link KeyMapping}. */
     public KeyMapping getVanillaMapping() {
         return vanillaMapping;
+    }
+
+    /** Returns the default {@link KeyCombo} for this binding (set at registration time). */
+    public KeyCombo getDefaultCombo() {
+        return defaultCombo;
     }
 
     /** Returns the current {@link KeyCombo} for this binding. */

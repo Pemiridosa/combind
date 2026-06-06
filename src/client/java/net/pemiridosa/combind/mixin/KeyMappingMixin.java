@@ -213,13 +213,7 @@ public abstract class KeyMappingMixin {
         if (binding == null)
             return;
 
-        KeyCombo combo = binding.getCombo();
-
-        InputConstants.Key defaultKey = this.getDefaultKey();
-
-        KeyCombo defaultCombo = inputKeyToCombo(defaultKey);
-
-        cir.setReturnValue(combo.equals(defaultCombo));
+        cir.setReturnValue(binding.getCombo().equals(binding.getDefaultCombo()));
     }
 
     /**
@@ -235,7 +229,11 @@ public abstract class KeyMappingMixin {
         if (binding == null)
             return;
 
-        binding.setCombo(inputKeyToCombo(key));
+        KeyCombo newCombo = key.equals(this.getDefaultKey())
+            ? binding.getDefaultCombo()
+            : inputKeyToCombo(key);
+
+        binding.setCombo(newCombo);
 
         CombindConfig.save();
     }
