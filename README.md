@@ -221,11 +221,11 @@ If you prefer the standard tick-polling pattern instead of callbacks, it works u
 
 ```java
 ClientTickEvents.END_CLIENT_TICK.register(client -> {
-    while (myMapping.consumeClick()) {
+    while (someActionMapping.consumeClick()) {
         // handle each queued click
     }
 
-    if (myMapping.isDown()) {
+    if (someActionMapping.isDown()) {
         // binding is currently held
     }
 });
