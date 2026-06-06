@@ -22,7 +22,7 @@ It is **client-side only** and requires no server-side installation.
 - **Allow Conflicts**: When disabled, pressing a combo will not also trigger bindings whose keys are fully contained in it. For example, binding both **E** and **Left Shift + E** means pressing **Left Shift + E** would normally fire both. Disabling this ensures only **Left Shift + E** fires. The same applies to sequences: if a single press and a multi-tap are bound to the same key (e.g. **Q** and **Q Q**), pressing that key will only trigger the single press binding. Two bindings like **Left Ctrl + E** and **Left Shift + E** are not considered conflicting, since pressing one can never accidentally fire the other. They only both trigger if you deliberately hold **Left Ctrl + Left Shift + E**. This setting only applies to bindings that share the same trigger key (default: on)
 - **Sequence Window**: How quickly you must press the key repeatedly in-game for a sequence to register (default: 400 ms)
 - **Sequence Recording Window**: How long the recorder waits between taps when capturing a sequence in the Controls screen (default: 200 ms)
-- Settings are saved to and loaded from `config/combind.json`
+- Settings are saved to `config/combind.json`
 
 ## Use Cases
 This mod shines in modpacks where keys are scarce and every binding needs to be deliberate, but works just as well in vanilla for extra flexibility.
@@ -35,7 +35,7 @@ This mod shines in modpacks where keys are scarce and every binding needs to be 
 This mod has no required dependencies beyond Fabric API. It works with:
 
 - **[ModMenu](https://modrinth.com/mod/modmenu)** _(recommended)_ — adds a config button to the mod list as an alternative to manually editing `config/combind.json`
-- **[Controlling](https://modrinth.com/mod/controlling)**/**[Searchables](https://modrinth.com/mod/searchables)** — search for bindings by their combo using syntax like `key:"Left Shift + E"` or `key:"Q Q"`
+- **[Controlling](https://modrinth.com/mod/controlling)** and **[Searchables](https://modrinth.com/mod/searchables)** — search for bindings by their combo using syntax like `key:"Left Shift + E"` or `key:"Q Q"`
 
 
 ---
