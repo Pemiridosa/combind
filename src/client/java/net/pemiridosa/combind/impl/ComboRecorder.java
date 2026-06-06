@@ -12,7 +12,7 @@ import java.util.*;
  *
  * <h2>Recording protocol</h2>
  * <ol>
- *   <li>Call {@link #startRecording(CombindKeyBinding)} when the user clicks a binding row.</li>
+ *   <li>Call {@link #startRecording()} when the user clicks a binding row.</li>
  *   <li>Feed key events via {@link #onKey(int, int)} and mouse events via
  *       {@link #onMouseButton(int, int)}.</li>
  *   <li>Poll {@link #isFinished()}; when {@code true} call {@link #finish()}
@@ -21,13 +21,16 @@ import java.util.*;
  *
  * <h2>Combo detection rules</h2>
  * <ul>
- *   <li><b>Chord</b>: user holds multiple keys; last key released is the trigger,
- *       earlier keys are modifiers. Finalizes immediately when all keys are released.</li>
+ *   <li><b>Chord</b>: user holds multiple keys; last key pressed is the trigger,
+ *       earlier held keys are modifiers. Finalizes immediately when all keys are released.</li>
  *   <li><b>Sequence</b>: same single key pressed N times within
  *       {@code CombindConfig.sequenceRecordingWindowMs} ms. After each release the recorder
  *       enters a <em>pending</em> state: if the same key arrives again in time the
  *       count increments; otherwise the result is committed on the next frame after
  *       the window expires.</li>
+ *   <li><b>Chord + sequence</b>: hold modifier(s), then tap the trigger key N times.
+ *       Releasing the trigger while modifiers remain held enters the pending state.
+ *       Finalizes when the window expires or the modifier(s) are released.</li>
  *   <li><b>Mouse button</b>: immediately finalizes with any currently held keyboard
  *       keys as modifiers (e.g. Left Shift + Left Button).</li>
  * </ul>
@@ -39,8 +42,6 @@ public final class ComboRecorder {
 
     private boolean recording = false;
     private boolean finished = false;
-
-    private CombindKeyBinding targetBinding = null;
 
     private final LinkedHashSet<InputKey> held = new LinkedHashSet<>();
     private final List<InputKey> pressOrder = new ArrayList<>();
@@ -62,12 +63,6 @@ public final class ComboRecorder {
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-    public void startRecording(CombindKeyBinding binding) {
-        targetBinding = binding;
-
-        startRecording();
-    }
-
     public void startRecording() {
         recording = true;
         finished = false;
@@ -85,10 +80,6 @@ public final class ComboRecorder {
 
     public boolean isRecording() {
         return recording;
-    }
-
-    public CombindKeyBinding getTargetBinding() {
-        return targetBinding;
     }
 
     /**
@@ -110,7 +101,6 @@ public final class ComboRecorder {
         recording = false;
         finished = false;
         pendingFinalize = false;
-        targetBinding = null;
 
         KeyCombo r = result != null
             ? result
@@ -178,14 +168,20 @@ public final class ComboRecorder {
             held.remove(iKey);
 
             if (held.isEmpty()) {
-                if (pressOrder.size() > 1) {
-                    // Chord: all keys released — finalize immediately
+                if (pendingFinalize) {
+                    // Modifiers released while mid-sequence detection: let the timeout handle it.
+                } else if (pressOrder.size() > 1 && sequenceCount == 1) {
+                    // Pure chord (no sequence): finalize immediately
                     buildAndFinalize();
                 } else {
-                    // Single key: wait to see if it's pressed again (sequence)
+                    // Single key or end of a sequence tap: wait for possible continuation
                     pendingFinalize = true;
                     pendingTime = System.currentTimeMillis();
                 }
+            } else if (!pendingFinalize && iKey.equals(lastSequenceKey)) {
+                // Trigger released while modifiers still held → potential chord+sequence
+                pendingFinalize = true;
+                pendingTime = System.currentTimeMillis();
             }
         }
 
@@ -216,8 +212,13 @@ public final class ComboRecorder {
     // ── Internal ─────────────────────────────────────────────────────────────
 
     private void buildAndFinalize() {
-        if (sequenceCount > 1 && pressOrder.size() == 1) {
-            result = KeyCombo.sequence(lastSequenceKey, sequenceCount);
+        if (sequenceCount > 1) {
+            // Pure sequence (no modifiers) or chord+sequence — lastSequenceKey is the trigger
+            InputKey[] mods = pressOrder.stream()
+                .filter(k -> !k.equals(lastSequenceKey))
+                .toArray(InputKey[]::new);
+
+            result = new KeyCombo(lastSequenceKey, mods, sequenceCount);
         } else {
             InputKey trigger = pressOrder.getLast();
 
@@ -231,47 +232,5 @@ public final class ComboRecorder {
         pendingFinalize = false;
         finished = true;
         recording = false;
-    }
-
-    // ── Preview ───────────────────────────────────────────────────────────────
-
-    public String getPreview() {
-        if (!recording)
-            return "";
-
-        if (sequenceCount > 0 && held.isEmpty())
-            return buildSequencePreview();
-
-        if (!held.isEmpty())
-            return buildChordPreview();
-
-        return "…";
-    }
-
-    private String buildChordPreview() {
-        List<String> parts = new ArrayList<>();
-
-        for (InputKey k : pressOrder)
-            if (held.contains(k))
-                parts.add(k.displayName());
-
-        return String.join(" + ", parts);
-    }
-
-    private String buildSequencePreview() {
-        String name = lastSequenceKey != null
-            ? lastSequenceKey.displayName()
-            : "?";
-
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < sequenceCount; i++) {
-            if (i > 0)
-                sb.append(' ');
-
-            sb.append(name);
-        }
-
-        return sb.toString();
     }
 }

@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *       recording, feeding them only to {@link ComboRecorder}.</li>
  *   <li>Every render frame our {@code extractRenderState} injection calls
  *       {@code keyBindsList.refreshEntries()} so the live preview in
- *       {@link KeyBindingListWidgetMixin} is updated.</li>
+ *       {@link KeyBindsList} is updated.</li>
  *   <li>When recording finishes the combo is applied, config is saved, and
  *       {@code selectedKey} is cleared.</li>
  * </ol>
@@ -114,7 +114,7 @@ public abstract class KeyBindsScreenMixin {
         if (binding == null)
             return;
 
-        ComboRecorder.INSTANCE.startRecording(binding);
+        ComboRecorder.INSTANCE.startRecording();
     }
 
     @Unique
