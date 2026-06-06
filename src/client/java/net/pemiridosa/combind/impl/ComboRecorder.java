@@ -21,13 +21,16 @@ import java.util.*;
  *
  * <h2>Combo detection rules</h2>
  * <ul>
- *   <li><b>Chord</b>: user holds multiple keys; last key released is the trigger,
- *       earlier keys are modifiers. Finalizes immediately when all keys are released.</li>
+ *   <li><b>Chord</b>: user holds multiple keys; last key pressed is the trigger,
+ *       earlier held keys are modifiers. Finalizes immediately when all keys are released.</li>
  *   <li><b>Sequence</b>: same single key pressed N times within
  *       {@code CombindConfig.sequenceRecordingWindowMs} ms. After each release the recorder
  *       enters a <em>pending</em> state: if the same key arrives again in time the
  *       count increments; otherwise the result is committed on the next frame after
  *       the window expires.</li>
+ *   <li><b>Chord + sequence</b>: hold modifier(s), then tap the trigger key N times.
+ *       Releasing the trigger while modifiers remain held enters the pending state.
+ *       Finalizes when the window expires or the modifier(s) are released.</li>
  *   <li><b>Mouse button</b>: immediately finalizes with any currently held keyboard
  *       keys as modifiers (e.g. Left Shift + Left Button).</li>
  * </ul>
@@ -178,14 +181,20 @@ public final class ComboRecorder {
             held.remove(iKey);
 
             if (held.isEmpty()) {
-                if (pressOrder.size() > 1) {
-                    // Chord: all keys released — finalize immediately
+                if (pendingFinalize) {
+                    // Modifiers released while mid-sequence detection: let the timeout handle it.
+                } else if (pressOrder.size() > 1 && sequenceCount == 1) {
+                    // Pure chord (no sequence): finalize immediately
                     buildAndFinalize();
                 } else {
-                    // Single key: wait to see if it's pressed again (sequence)
+                    // Single key or end of a sequence tap: wait for possible continuation
                     pendingFinalize = true;
                     pendingTime = System.currentTimeMillis();
                 }
+            } else if (!pendingFinalize && iKey.equals(lastSequenceKey)) {
+                // Trigger released while modifiers still held → potential chord+sequence
+                pendingFinalize = true;
+                pendingTime = System.currentTimeMillis();
             }
         }
 
@@ -216,8 +225,13 @@ public final class ComboRecorder {
     // ── Internal ─────────────────────────────────────────────────────────────
 
     private void buildAndFinalize() {
-        if (sequenceCount > 1 && pressOrder.size() == 1) {
-            result = KeyCombo.sequence(lastSequenceKey, sequenceCount);
+        if (sequenceCount > 1) {
+            // Pure sequence (no modifiers) or chord+sequence — lastSequenceKey is the trigger
+            InputKey[] mods = pressOrder.stream()
+                .filter(k -> !k.equals(lastSequenceKey))
+                .toArray(InputKey[]::new);
+
+            result = new KeyCombo(lastSequenceKey, mods, sequenceCount);
         } else {
             InputKey trigger = pressOrder.getLast();
 
@@ -239,8 +253,18 @@ public final class ComboRecorder {
         if (!recording)
             return "";
 
-        if (sequenceCount > 0 && held.isEmpty())
-            return buildSequencePreview();
+        if (pendingFinalize && sequenceCount > 0) {
+            // Show held modifiers + sequence taps, e.g. "Left Shift + Q Q"
+            List<String> parts = new ArrayList<>();
+
+            for (InputKey k : pressOrder)
+                if (held.contains(k))
+                    parts.add(k.displayName());
+
+            String seq = buildSequenceString();
+
+            return parts.isEmpty() ? seq : String.join(" + ", parts) + " + " + seq;
+        }
 
         if (!held.isEmpty())
             return buildChordPreview();
@@ -258,7 +282,7 @@ public final class ComboRecorder {
         return String.join(" + ", parts);
     }
 
-    private String buildSequencePreview() {
+    private String buildSequenceString() {
         String name = lastSequenceKey != null
             ? lastSequenceKey.displayName()
             : "?";
