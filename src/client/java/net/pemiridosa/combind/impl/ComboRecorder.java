@@ -90,10 +90,6 @@ public final class ComboRecorder {
         return recording;
     }
 
-    public CombindKeyBinding getTargetBinding() {
-        return targetBinding;
-    }
-
     /**
      * Returns true when a result is ready. Also commits a pending single-key
      * result once the sequence window has expired — called every frame via the
@@ -245,57 +241,5 @@ public final class ComboRecorder {
         pendingFinalize = false;
         finished = true;
         recording = false;
-    }
-
-    // ── Preview ───────────────────────────────────────────────────────────────
-
-    public String getPreview() {
-        if (!recording)
-            return "";
-
-        if (pendingFinalize && sequenceCount > 0) {
-            // Show held modifiers + sequence taps, e.g. "Left Shift + Q Q"
-            List<String> parts = new ArrayList<>();
-
-            for (InputKey k : pressOrder)
-                if (held.contains(k))
-                    parts.add(k.displayName());
-
-            String seq = buildSequenceString();
-
-            return parts.isEmpty() ? seq : String.join(" + ", parts) + " + " + seq;
-        }
-
-        if (!held.isEmpty())
-            return buildChordPreview();
-
-        return "…";
-    }
-
-    private String buildChordPreview() {
-        List<String> parts = new ArrayList<>();
-
-        for (InputKey k : pressOrder)
-            if (held.contains(k))
-                parts.add(k.displayName());
-
-        return String.join(" + ", parts);
-    }
-
-    private String buildSequenceString() {
-        String name = lastSequenceKey != null
-            ? lastSequenceKey.displayName()
-            : "?";
-
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < sequenceCount; i++) {
-            if (i > 0)
-                sb.append(' ');
-
-            sb.append(name);
-        }
-
-        return sb.toString();
     }
 }
