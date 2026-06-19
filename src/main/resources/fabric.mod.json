@@ -8,7 +8,8 @@
 		"Pemiridosa"
 	],
 	"contact": {
-		"sources": "https://github.com/Pemiridosa/combind"
+		"sources": "https://github.com/Pemiridosa/combind",
+		"issues": "https://github.com/Pemiridosa/combind/issues"
 	},
 	"license": "MIT",
 	"icon": "assets/combind/icon.png",
