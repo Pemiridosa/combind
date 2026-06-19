@@ -62,7 +62,7 @@ public abstract class KeyMappingMixin {
 
         if (binding != null && !binding.getCombo().isUnbound()) {
             // guard on screen == null, mirroring vanilla's KeyMapping.releaseAll() on screen open.
-            cir.setReturnValue(binding.isActive() && Minecraft.getInstance().screen == null);
+            cir.setReturnValue(binding.isActive() && Minecraft.getInstance().gui.screen() == null);
         }
     }
 

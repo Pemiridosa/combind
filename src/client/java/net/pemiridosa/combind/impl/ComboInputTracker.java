@@ -79,7 +79,7 @@ public final class ComboInputTracker {
      * We apply the same gate here.
      */
     private void handlePress(InputKey key) {
-        if (Minecraft.getInstance().screen != null)
+        if (Minecraft.getInstance().gui.screen() != null)
             return;
 
         long now = System.currentTimeMillis();
