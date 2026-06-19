@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * continue triggering actions (e.g. moving while inventory is open).
  */
 @Mixin(Gui.class)
-public abstract class MinecraftMixin {
+public abstract class GuiMixin {
     @Inject(
         method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V",
         at = @At("HEAD")
