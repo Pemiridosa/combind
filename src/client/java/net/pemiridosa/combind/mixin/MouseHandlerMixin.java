@@ -16,9 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * {@link KeyboardHandlerMixin}.
  *
  * <p>Recording is handled here rather than in the screen's {@code mouseClicked}
- * hook because vanilla only dispatches {@code mouseClicked} to screens for
- * buttons 0–2. Side buttons (3+) never reach the screen hook, so they must be
- * captured here where all GLFW button events arrive.
+ * hook, since this runs for every button before the screen is dispatched to.
  *
  * <p>Do NOT cancel, so vanilla key-mapping and screen dispatch continue normally.
  */

@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  * <pre>{@code
  * // In your client initialiser:
  * CombindKeyBinding binding = CombindKeyBinding.of(
- *     new KeyMapping("key.mymod.myaction", GLFW.GLFW_KEY_A, "key.categories.mymod")
+ *     new KeyMapping("key.mymod.myaction", InputConstants.KEY_A, "key.categories.mymod")
  * );
  *
  * binding.onPress(ctx -> System.out.println("pressed!"));
@@ -61,7 +61,7 @@ public final class CombindKeyBinding {
 
         InputKey initialKey;
 
-        if (def.getType() == InputConstants.Type.KEYSYM && def.getValue() != InputConstants.UNKNOWN.getValue()) {
+        if (def.getType() == InputConstants.Type.KEYBOARD && def.getValue() != InputConstants.UNKNOWN.getValue()) {
             initialKey = InputKey.keyboard(def.getValue());
         } else if (def.getType() == InputConstants.Type.MOUSE) {
             initialKey = InputKey.mouse(def.getValue());

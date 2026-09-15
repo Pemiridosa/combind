@@ -36,7 +36,7 @@ This mod shines in modpacks where keys are scarce and every binding needs to be 
 This mod has no required dependencies beyond Fabric API. It works with:
 
 - **[ModMenu](https://modrinth.com/mod/modmenu)** _(recommended)_ — adds a config button to the mod list as an alternative to manually editing `config/combind.json`
-- **[Controlling](https://modrinth.com/mod/controlling)** and **[Searchables](https://modrinth.com/mod/searchables)** — search for bindings by their combo using syntax like `key:"Left Shift + E"` or `key:"Q Q"`
+- **[Controlling](https://modrinth.com/mod/controlling)** and **[Searchables](https://modrinth.com/mod/searchables)** — search for bindings by their combo using syntax like `key:"Left Shift + E"` or `key:"Q Q"`. Unsupported as of `combind-v1.0.0+26.3`, until both mods release a version compatible with 26.3
 
 
 ---
@@ -88,7 +88,7 @@ Declare the dependency in `fabric.mod.json`. Use `depends` if your mod requires 
 |---|---|
 | `CombindKeyBinding` | Wraps a vanilla `KeyMapping` with combo support — the main entry point |
 | `KeyCombo` | Describes a combo: single key, chord, sequence, or chord + sequence |
-| `InputKey` | Represents one physical input — `InputKey.keyboard(glfwCode)` or `InputKey.mouse(glfwButton)` |
+| `InputKey` | Represents one physical input — `InputKey.keyboard(scancode)` or `InputKey.mouse(button)` |
 
 ---
 
@@ -104,14 +104,14 @@ KeyMapping.Category category = KeyMapping.Category.register(
 );
 
 KeyMapping someActionMapping = KeyMappingHelper.registerKeyMapping(
-    new KeyMapping("key.mymod.someaction", GLFW.GLFW_KEY_E, category)
+    new KeyMapping("key.mymod.someaction", InputConstants.KEY_E, category)
 );
 
 // Left Shift + E
 CombindKeyBinding someActionBinding = CombindKeyBinding.of(someActionMapping,
     new KeyCombo(
-        InputKey.keyboard(GLFW.GLFW_KEY_E),
-        new InputKey[]{ InputKey.keyboard(GLFW.GLFW_KEY_LEFT_SHIFT) }
+        InputKey.keyboard(InputConstants.KEY_E),
+        new InputKey[]{ InputKey.keyboard(InputConstants.KEY_LSHIFT) }
     )
 );
 
@@ -126,16 +126,16 @@ Bind an action to **Left Control + Left Shift + E**:
 
 ```java
 KeyMapping someActionMapping = KeyMappingHelper.registerKeyMapping(
-    new KeyMapping("key.mymod.someaction", GLFW.GLFW_KEY_E, category)
+    new KeyMapping("key.mymod.someaction", InputConstants.KEY_E, category)
 );
 
 // Left Control + Left Shift + E
 CombindKeyBinding someActionBinding = CombindKeyBinding.of(someActionMapping,
     new KeyCombo(
-        InputKey.keyboard(GLFW.GLFW_KEY_E),
+        InputKey.keyboard(InputConstants.KEY_E),
         new InputKey[]{
-            InputKey.keyboard(GLFW.GLFW_KEY_LEFT_CONTROL),
-            InputKey.keyboard(GLFW.GLFW_KEY_LEFT_SHIFT)
+            InputKey.keyboard(InputConstants.KEY_LCONTROL),
+            InputKey.keyboard(InputConstants.KEY_LSHIFT)
         }
     )
 );
@@ -151,17 +151,17 @@ Bind an action to **M M** (double-tap) or **M M M** (triple-tap):
 
 ```java
 KeyMapping someActionMapping = KeyMappingHelper.registerKeyMapping(
-    new KeyMapping("key.mymod.someaction", GLFW.GLFW_KEY_M, category)
+    new KeyMapping("key.mymod.someaction", InputConstants.KEY_M, category)
 );
 
 // Double-tap M (M M)
 CombindKeyBinding someActionBinding = CombindKeyBinding.of(someActionMapping,
-    KeyCombo.sequence(InputKey.keyboard(GLFW.GLFW_KEY_M), 2)
+    KeyCombo.sequence(InputKey.keyboard(InputConstants.KEY_M), 2)
 );
 
 // Triple-tap M (M M M) — even safer
 CombindKeyBinding someActionBinding = CombindKeyBinding.of(someActionMapping,
-    KeyCombo.sequence(InputKey.keyboard(GLFW.GLFW_KEY_M), 3)
+    KeyCombo.sequence(InputKey.keyboard(InputConstants.KEY_M), 3)
 );
 
 someActionBinding
@@ -177,8 +177,8 @@ Bind an action to **Left Shift + Q Q** (double-tap Q while holding Shift):
 // Left Shift + Q Q
 CombindKeyBinding binding = CombindKeyBinding.of(mapping,
     new KeyCombo(
-        InputKey.keyboard(GLFW.GLFW_KEY_Q),
-        new InputKey[]{ InputKey.keyboard(GLFW.GLFW_KEY_LEFT_SHIFT) },
+        InputKey.keyboard(InputConstants.KEY_Q),
+        new InputKey[]{ InputKey.keyboard(InputConstants.KEY_LSHIFT) },
         2
     )
 );
@@ -192,8 +192,8 @@ Bind an action to **Left Control + Left Button**:
 // Left Control + Left Mouse Button
 CombindKeyBinding binding = CombindKeyBinding.of(mapping,
     new KeyCombo(
-        InputKey.mouse(GLFW.GLFW_MOUSE_BUTTON_LEFT),
-        new InputKey[]{ InputKey.keyboard(GLFW.GLFW_KEY_LEFT_CONTROL) }
+        InputKey.mouse(InputConstants.MOUSE_BUTTON_LEFT),
+        new InputKey[]{ InputKey.keyboard(InputConstants.KEY_LCONTROL) }
     )
 );
 ```

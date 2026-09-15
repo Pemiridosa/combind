@@ -1,7 +1,6 @@
 package net.pemiridosa.combind.mixin;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
 import net.pemiridosa.combind.api.CombindKeyBinding;
 import net.pemiridosa.combind.api.InputKey;
 import net.pemiridosa.combind.api.KeyCombo;
@@ -12,7 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -84,7 +83,7 @@ public abstract class KeyMappingMixin {
      *
      * <p>Vanilla screens (e.g. inventory F-swap) call {@code matches()} when a key
      * is pressed. We check the trigger key, then verify every modifier is physically
-     * held via GLFW. Querying GLFW directly works even in GUI context where our
+     * held via SDL. Querying SDL directly works even in GUI context where our
      * tracked heldKeys set has been cleared by {@code releaseAll()}.
      *
      * <p>Sequences return false: there is no press-history available in a screen
@@ -108,15 +107,13 @@ public abstract class KeyMappingMixin {
             return;
         }
 
-        if (!(combo.triggerKey() instanceof InputKey.Keyboard(int glfwCode)) || glfwCode != event.key()) {
+        if (!(combo.triggerKey() instanceof InputKey.Keyboard(int scancode)) || scancode != event.key()) {
             cir.setReturnValue(false);
             return;
         }
 
-        Window window = Minecraft.getInstance().getWindow();
-
         for (InputKey mod : combo.modifiers()) {
-            if (!isPhysicallyHeld(window, mod)) {
+            if (!isPhysicallyHeld(mod)) {
                 cir.setReturnValue(false);
                 return;
             }
@@ -143,14 +140,12 @@ public abstract class KeyMappingMixin {
             return;
         }
 
-        if (!(combo.triggerKey() instanceof InputKey.Mouse(int glfwButton)) || glfwButton != event.button()) {
+        if (!(combo.triggerKey() instanceof InputKey.Mouse(int button)) || button != event.button()) {
             cir.setReturnValue(false); return;
         }
 
-        Window window = Minecraft.getInstance().getWindow();
-
         for (InputKey mod : combo.modifiers()) {
-            if (!isPhysicallyHeld(window, mod)) {
+            if (!isPhysicallyHeld(mod)) {
                 cir.setReturnValue(false);
                 return;
             }
@@ -240,16 +235,16 @@ public abstract class KeyMappingMixin {
 
 
     @Unique
-    private static boolean isPhysicallyHeld(Window window, InputKey key) {
+    private static boolean isPhysicallyHeld(InputKey key) {
         return switch (key) {
-            case InputKey.Keyboard kb -> InputConstants.isKeyDown(window, kb.glfwCode());
-            case InputKey.Mouse    m  -> GLFW.glfwGetMouseButton(window.handle(), m.glfwButton()) == GLFW.GLFW_PRESS;
+            case InputKey.Keyboard kb -> InputConstants.isKeyDown(kb.scancode());
+            case InputKey.Mouse    m  -> (SDLMouse.SDL_GetMouseState(null, null) & (1 << (m.button() - 1))) != 0;
         };
     }
 
     @Unique
     private static KeyCombo inputKeyToCombo(InputConstants.Key key) {
-        if (key.getType() == InputConstants.Type.KEYSYM) {
+        if (key.getType() == InputConstants.Type.KEYBOARD) {
             if (key.getValue() == InputConstants.UNKNOWN.getValue())
                 return KeyCombo.unbound();
 

@@ -35,8 +35,9 @@ dependencies {
 	compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 	localRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
 
-	localRuntime "com.blamejared.controlling:Controlling-fabric-26.2:26.2.2"
-	localRuntime "com.blamejared.searchables:Searchables-fabric-26.2:1.0.1"
+	// No 26.3 builds of Controlling/Searchables yet; the 26.2 builds pin minecraft 26.2 exactly
+	// localRuntime "com.blamejared.controlling:Controlling-fabric-26.2:26.2.2"
+	// localRuntime "com.blamejared.searchables:Searchables-fabric-26.2:1.0.1"
 }
 
 processResources {

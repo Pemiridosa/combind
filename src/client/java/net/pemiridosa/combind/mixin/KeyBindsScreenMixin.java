@@ -55,11 +55,9 @@ public abstract class KeyBindsScreenMixin {
         cancellable = true
     )
     private void combind$beforeMouseClicked(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
-        // Recording is handled in MouseHandlerMixin (fires for all buttons including side
-        // buttons 3+, which never reach mouseClicked). We only need to cancel here so the
-        // screen doesn't react to button presses mid-recording.
-        // Check isFinished() too: for buttons 0-2, MouseHandlerMixin already completed
-        // recording before this mouseClicked dispatch fires.
+        // Recording is handled in MouseHandlerMixin, which runs before this dispatch.
+        // We only need to cancel here so the screen doesn't react to button presses mid-recording.
+        // Check isFinished() too, since by now MouseHandlerMixin has already completed recording.
         if (ComboRecorder.INSTANCE.isRecording() || ComboRecorder.INSTANCE.isFinished()) {
             cir.setReturnValue(true);
             cir.cancel();

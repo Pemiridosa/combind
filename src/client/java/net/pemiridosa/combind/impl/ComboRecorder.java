@@ -1,9 +1,8 @@
 package net.pemiridosa.combind.impl;
 
-import net.pemiridosa.combind.api.CombindKeyBinding;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.pemiridosa.combind.api.InputKey;
 import net.pemiridosa.combind.api.KeyCombo;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
@@ -118,7 +117,7 @@ public final class ComboRecorder {
         if (!recording)
             return false;
 
-        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
+        if (key == InputConstants.KEY_ESCAPE && action == InputConstants.PRESS) {
             result = KeyCombo.unbound();
             pendingFinalize = false;
             finished = true;
@@ -129,7 +128,7 @@ public final class ComboRecorder {
 
         InputKey iKey = InputKey.keyboard(key);
 
-        if (action == GLFW.GLFW_PRESS) {
+        if (action == InputConstants.PRESS) {
             long now = System.currentTimeMillis();
 
             if (pendingFinalize) {
@@ -164,7 +163,7 @@ public final class ComboRecorder {
             if (!pressOrder.contains(iKey))
                 pressOrder.add(iKey);
 
-        } else if (action == GLFW.GLFW_RELEASE) {
+        } else if (action == InputConstants.RELEASE) {
             held.remove(iKey);
 
             if (held.isEmpty()) {
@@ -196,7 +195,7 @@ public final class ComboRecorder {
         if (!recording)
             return false;
 
-        if (action != GLFW.GLFW_PRESS)
+        if (action != InputConstants.PRESS)
             return true;
 
         InputKey[] mods = held.toArray(InputKey[]::new);

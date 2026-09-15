@@ -14,14 +14,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * feeding them to {@link ComboInputTracker} (for normal gameplay) and
  * {@link ComboRecorder} (when the overlay is recording a combo).
  *
- * <p>In MC 26.1.2 the GLFW callback is wrapped into a {@link KeyEvent} record
+ * <p>In MC 26.3 the SDL event is wrapped into a {@link KeyEvent} record
  * and dispatched to the main thread as keyPress(long, int, KeyEvent).
  */
 @Mixin(KeyboardHandler.class)
 public abstract class KeyboardHandlerMixin {
     /**
      * {@code keyPress} is the internal method called on the main thread for
-     * every GLFW key event.
+     * every SDL key event.
      */
     @Inject(
         method = "keyPress(JILnet/minecraft/client/input/KeyEvent;)V",

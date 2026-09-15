@@ -1,11 +1,11 @@
 package net.pemiridosa.combind.impl;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.pemiridosa.combind.api.CombindKeyBinding;
 import net.pemiridosa.combind.api.CombindKeyBinding.PressContext;
 import net.pemiridosa.combind.api.InputKey;
 import net.pemiridosa.combind.api.KeyCombo;
 import net.minecraft.client.Minecraft;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
@@ -45,11 +45,11 @@ public final class ComboInputTracker {
     public void onKey(int key, int action) {
         InputKey iKey = InputKey.keyboard(key);
 
-        if (action == GLFW.GLFW_PRESS) {
+        if (action == InputConstants.PRESS) {
             heldKeys.add(iKey);
 
             handlePress(iKey);
-        } else if (action == GLFW.GLFW_RELEASE) {
+        } else if (action == InputConstants.RELEASE) {
             heldKeys.remove(iKey);
 
             handleRelease(iKey);
@@ -61,11 +61,11 @@ public final class ComboInputTracker {
     public void onMouseButton(int button, int action) {
         InputKey iKey = InputKey.mouse(button);
 
-        if (action == GLFW.GLFW_PRESS) {
+        if (action == InputConstants.PRESS) {
             heldKeys.add(iKey);
 
             handlePress(iKey);
-        } else if (action == GLFW.GLFW_RELEASE) {
+        } else if (action == InputConstants.RELEASE) {
             heldKeys.remove(iKey);
 
             handleRelease(iKey);

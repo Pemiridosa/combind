@@ -3,6 +3,7 @@ package net.pemiridosa.combind.api;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.pemiridosa.combind.impl.GlfwKeyCodes;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
@@ -119,13 +120,13 @@ public record KeyCombo(InputKey triggerKey, InputKey[] modifiers, int sequenceCo
     }
 
     public static KeyCombo fromJson(JsonObject obj) {
-        // Trigger: new format {"type":"keyboard","code":76} OR legacy int field "triggerKey"
+        // Trigger: new format {"type":"keyboard","code":76,"key":"key.keyboard.l"} OR legacy int field "triggerKey"
         InputKey trigger;
 
         if (obj.has("trigger")) {
             trigger = InputKey.fromJson(obj.getAsJsonObject("trigger"));
         } else {
-            trigger = InputKey.keyboard(obj.get("triggerKey").getAsInt());
+            trigger = InputKey.fromName(GlfwKeyCodes.keyboardName(obj.get("triggerKey").getAsInt()));
         }
 
         // Modifiers: new format [{...}] OR legacy [int, ...]
@@ -141,7 +142,7 @@ public record KeyCombo(InputKey triggerKey, InputKey[] modifiers, int sequenceCo
 
                 mods[i] = el.isJsonObject()
                     ? InputKey.fromJson(el.getAsJsonObject())
-                    : InputKey.keyboard(el.getAsInt()); // legacy int
+                    : InputKey.fromName(GlfwKeyCodes.keyboardName(el.getAsInt())); // legacy int
             }
         }
 
@@ -226,8 +227,8 @@ public record KeyCombo(InputKey triggerKey, InputKey[] modifiers, int sequenceCo
 
     static int keyOrdinal(InputKey k) {
         return switch (k) {
-            case InputKey.Keyboard kb -> kb.glfwCode();
-            case InputKey.Mouse    m  -> 0x40000 + m.glfwButton();
+            case InputKey.Keyboard kb -> kb.scancode();
+            case InputKey.Mouse    m  -> 0x40000 + m.button();
         };
     }
 }
